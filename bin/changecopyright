@@ -1,0 +1,39 @@
+#!/bin/sh
+#
+#	changecopyright
+#		Change the file contents about their copyright description.
+#		The original copyright between "{{IS_RIGHT" & "}}IS_RIGHT" will be
+#		removed, and the new description will be inserted.
+#
+
+scriptnm=/home/bin/script/textfiles
+tmpldir=$0
+tmpldir=${tmpldir%/*}/copyright.template
+
+case $# in
+0)	echo 'Usage: [ext=".cxx .h"] changecopyright dir-name ...' 1>&2
+	echo "  Change the file's copyright description for those files under dir-name" 1>&2
+	echo "  If ext is not specified, the content of $scriptnm is assumed." 1>&2
+	echo "  Note that the new copyright description is stored in $tmpldir/license.txt" 1>&2
+	echo "  Example: changecopyright ." 1>&2
+	exit 2;;
+esac
+
+if [ -z "$ext" ]
+then
+ext=$(cat $scriptnm)
+fi
+
+for extnm in $ext
+do
+	for flnm in $(find $* -iname \*$extnm)
+	do
+		echo update $flnm
+		case ${flnm##*/} in
+			makefile | Makefile | *.mak | *.make )
+				sed -f $tmpldir/delcopyright.mak.sed $flnm | sed -f $tmpldir/inscopyright.mak.sed | overwrite $flnm;;
+			* )
+				sed -f $tmpldir/delcopyright.sed $flnm | sed -f $tmpldir/inscopyright.sed | overwrite $flnm;;
+		esac
+	done
+done

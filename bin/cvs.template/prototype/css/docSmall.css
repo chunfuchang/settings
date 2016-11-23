@@ -1,0 +1,231 @@
+/* headers */
+h1 {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 13pt; color: #250070;
+	letter-spacing: -1px; margin-top: 3pt
+}
+h1.smaller { font-size: 11pt}
+h2 {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 12pt; color: #200066
+}
+h2.smaller { font-size: 10pt}
+h3 {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 11pt; color: #100050
+}
+h4 {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 10pt; color: #107080
+}
+h5 {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 9.5pt; color: #603080
+}
+h6 {
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 9.5pt; color: #404040
+}
+
+/* paragraphs */
+p {
+	font-family: "Trebuchet MS", Tahoma, Arial, Verdana, serif;
+	font-size: 9.5pt
+}
+input {
+	font-family: "Trebuchet MS", Tahoma, Arial, Verdana, serif;
+	font-size: 9.5pt;
+	border-width: 1px; border-color: darkgray;
+}
+textarea {
+	font-family: "Trebuchet MS", Tahoma, Arial, Verdana, serif;
+	font-size: 9pt;
+	border-width: 1px; border-color: darkgray;
+}
+option {
+	font-family: "Trebuchet MS", Tahoma, Arial, Verdana, serif;
+	font-size: 8.5pt;
+	border-width: 1px; border-color: darkgray;
+}
+select {
+	border-width: 1px; border-color: darkgray;
+}
+hr {
+	color: lightgray; background-color: lightgray;
+	height: 1px;
+}
+pre {
+	font-family: "Trebuchet MS", Tahoma, Arial, Verdana, serif;
+	font-size: 9.5pt
+}
+body {
+	font-family: "Trebuchet MS", Tahoma, Arial, Verdana, serif;
+	font-size: 9.5pt
+}
+th {
+	font-family: Verdana, Tahoma, "Garamond", "Century", Arial, serif;
+	font-size: 9.5pt; color: #180060; text-align: left
+}
+td {
+	font-family: "Trebuchet MS", Tahoma, Arial, Verdana, serif;
+	font-size: 9.5pt
+}
+div {
+	font-family: "Trebuchet MS", Tahoma, Arial, Verdana, serif;
+	font-size: 9.5pt
+}
+span {
+	font-family: "Trebuchet MS", Tahoma, Arial, Verdana, serif;
+	font-size: 9.5pt
+}
+code {
+	font-family: "Lucida Console", "Courier New", "Courier", "mono";
+	font-size: 9.5pt; color: #202070
+}
+dfn {
+	font-family: "Lucida Console", "Courier New", "Courier", "mono";
+	font-size: 9.5pt; font-style: normal
+}
+
+dt {
+  margin: 0.5em 0 0.3em 0;
+}
+dd {
+  margin: 0 0 0 0.5em;
+}
+
+img	{border: 0}
+
+h1 em	{color: #dd0000}
+
+li	{margin-left: -16pt; margin-top: 2pt}
+ul li	{list-style: url(/images/bullet1.gif) disc}
+ul ul li	{list-style: url(/images/bullet2.gif) circle}
+ul ul ul li	{list-style: url(/images/bullet3.gif) square}
+
+.modified	{color: #008060}
+.error	{color: #C04020}
+.code {
+	font-family: "Lucida Console", "Courier New", "Courier", "mono";
+}
+
+/* The tree menu's style class. Note: we make it diff from 'tree'. */
+.menu {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 9pt; color: #000060
+}
+A.menu:link, A.menu:active {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 9pt; color: #000060; text-decoration: none
+}
+A.menu:visited {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 9pt; color: #800090; text-decoration: none
+}
+
+/* The style class of a tab box's tab. */
+.tab {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 8.5pt; color: #300030
+}
+A.tab:link, A.tab:active {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 8.5pt; color: #300030; text-decoration: none
+}
+A.tab:visited {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 8.5pt; color: #500050; text-decoration: none
+}
+
+/* The popup's style class. */
+.popup	{background-color: lightyellow}
+
+/* The popup window's style class. */
+.popupWindow {background-color: #ECE9D8; border: outset 6px}
+
+/* The grid/box header's style class. */
+.header	{background-color:lightyellow}
+
+/* The grid/box footer's style class. */
+.footer {background-color:lightyellow}
+
+/* The hyperlink's style class. */
+.link {cursor:hand}
+
+/* The hilite style class. */
+.hilite {font-weight: bold; background-color: #CCCCCC}
+
+/* Miscellaneous style classes. */
+DIV.error {border: outset 1px; background-color: #FFA050; color: black}
+DIV.warning {border: outset 1px; background-color: #FFF050; color: black}
+DIV.message {border: outset 1px; background-color: #C0F0D0; color: black}
+.larger { font-size: 12pt; color: #200066}
+.smaller { font-size: 8.5pt}
+.smaller-strike { font-size: 8.5pt; text-decoration: line-through; color: #C0C0C0}
+.seeAlso { color: #663399}
+.note { color: #990011; font-weight: bold}
+.notesm { color: #990011; font-size: 8.5pt}
+.example { color: #661088}
+
+
+p.firstLetter:first-letter {
+	font-size: 300%; float: left; font-weight: bold; color: #003366; margin-top: 5px
+}
+
+.h1 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 15pt; color: #250070;
+	letter-spacing: -1px; margin-top: 3pt
+}
+.h2 {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 13pt; color: #200066
+}
+.h3 {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 11pt; color: #100050
+}
+.h4 {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 10pt; color: #107080
+}
+.h5 {
+	font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 10pt; color: #603080
+}
+.h6 {
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 10pt; color: #404040
+}
+.th {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10pt; color: #180060; text-align: left; background-color:lightyellow
+}
+.rh {
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 10pt; color: #FFFFFF; text-align: center; 
+	background-color: #008080;
+	border-bottom: 1pt solid silver;
+	border-top: 1pt solid silver
+}
+.focus {
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 10pt; font-weight: bold; color: #FFFFFF; 
+	background-color: #FFFFC0
+}
+
+.contextmenu {
+  margin: 2em 0 0 1em;
+  text-align: right;
+  list-style-type: none;
+}
+.contextmenu li {
+  font-size: 85%;
+  font-family: Verdana, sans-serif;
+}
+.codeblock {
+  display: block;
+  margin: 1em;
+  border: 1px solid #999;
+  padding: 0.5em;
+}

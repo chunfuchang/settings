@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# Tom M. Yeh
+# Copyright (C) Potix Corporation. All Rights Reserved.
+
+if [ "$1" = "" ] ; then
+	echo "Use:"
+	echo "  findbom dir1 dir2"
+	echo "  findbom *"
+	exit 1
+fi
+
+function dofind {
+	if [ "$(od -x -N 8 $1 | grep bbef)" != "" ] ; then
+		echo "$(pwd)/$1"
+	fi
+}
+
+function dodir {
+	for f in $* ; do
+		if [ -f "$f" ] ; then
+			dofind "$f"
+		elif [ -d "$f" ] ; then
+			(
+			cd "$f"
+			dodir *
+			)
+		fi
+	done
+}
+
+#echo "Search $* for files containing UTF-BOM"
+dodir $*

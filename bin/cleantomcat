@@ -1,0 +1,15 @@
+#!/bin/bash
+#
+# Clean up tomcat
+#
+# Tom M. Yeh
+# Copyright (C) 2003 Potix Corporation. All Rights Reserved.
+tomcat stop
+if [ "$1" != "logs" ] ; then
+	echo rm -rf /usr/tomcat/webapps/*
+	rm -rf /usr/tomcat/webapps/*
+	echo 'rm -rf /usr/tomcat/shared/lib/*.jar'
+	rm -rf /usr/tomcat/shared/lib/*.jar
+fi
+echo 'rm -rf /usr/tomcat/logs/*'
+rm -rf /usr/tomcat/logs/*

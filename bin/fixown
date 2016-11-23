@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# Tom M. Yeh
+# Copyright (C) Potix Corporation. All Rights Reserved.
+
+if [ \( $# = 0 \) -o \( "$1" = "-h" \) -o \( "$1" = "--help" \) ] ; then
+	echo "Usage:"
+	echo "   fixown dir"
+	echo
+	echo "When a file is modified by a Windows program, its owner and permission"
+	echo "are changed strangely."
+	echo "This program is then designed to fix them."
+	exit 0
+fi
+
+function doFix
+{
+	if [ -e $1 ] ; then
+		chown $USER $1
+		if [ -d $1 ] ; then
+			chmod 700 $1
+		else
+			chmod 600 $1
+		fi
+	fi
+}
+
+function fixRecur
+{
+	local dir=$1
+	doFix $dir
+	if [ -d $dir ] ; then
+		(
+			cd $dir
+			echo fixing $(pwd)...
+			for fn in * ; do
+				fixRecur $fn
+			done
+		)
+	fi
+}
+
+for dir in $* ; do
+	if [ -e $dir ] ; then
+		fixRecur $dir
+	else
+		echo $dir is not a directory or a file
+	fi
+done

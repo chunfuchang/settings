@@ -1,0 +1,141 @@
+#!/bin/bash
+#
+# To know xc, simply run xc without argument
+#
+# Tom M. Yeh, August 10, 2000
+# Tom M. Yeh, July 27, 2001
+#
+# Copyright (C) 2000-2002 Potix Corporation.
+
+case $# in
+0)	echo "xc -- extended CVS"
+	echo "Copyright (C) 2000-2002 Potix Corporation. All rights reserved."
+	echo
+	echo "The use of xc is the same as cvs, except:" 1>&2
+	echo "1) it assumes the current directory as the root of one of the projects." 1>&2
+	echo "2) it automatically updates CVSROOT to the right project based on the" 1>&2
+	echo "   current directory." 1>&2
+	echo "3) The import command invokes cvsimport to do the job." 1>&2
+	echo "4) New feature: ndiff to compare the difference between the newest" 1>&2
+	echo "   version and the working copy." 1>&2
+	echo "5) New feature: sync to add non-added files and to remove non-existent" 1>&2
+	echo "   but checkouted files to/from CVS repository. However, only java, html and xml files" 1>&2
+	echo "   will be added." 1>&2
+	echo "   sync can also remove your checkout files if they are removed from" 1>&2
+	echo "   CVS repository by someone else." 1>&2
+	echo "   Also, it prompts users before removing any file." 1>&2
+	echo "   -l  local; only in the specified directory" 1>&2
+	echo "   -R  recusrively (default)" 1>&2
+	echo "6) New feature fix to fix repository and entries for directory renaming..." 1>&2
+	echo "   It assumes all subdirectories of the specified ones are checked out" 1>&2
+	echo "   from the same CVS repository."
+	
+	exit 2;;
+esac
+
+if [ -f CVS/Root ] ; then
+	prj=$(head -1 CVS/Root)
+	export CVSROOT=$prj
+	prj=${prj##*/}
+else
+	if [ "$cvsPrjs" == "" ] ; then 
+		prjList=" zk1 zkweb zkforge java welc i3 m2 m3 o2 jex jedi eTest "
+		#The spaces at the begining and end can not be removed
+	else
+		prjList=$cvsPrjs
+	fi
+
+	prj=${PWD:-$(pwd)}
+	prj=${prj##*/}
+	if [ "${prjList#* $prj }" != "$prjList" ]  ; then
+		#export CVSROOT=:pserver:${USER}\@time:/cvsroot/${prj}
+		export CVSROOT=:local://time/potix/rd/cvs/${prj}
+	elif [ "$prj" = "httpd" ] ; then
+		export CVSROOT=:local://time/potix/web/cvs
+	else
+		echo "xc: $prj is not a valid project. Make sure the current directory is" 1>&2
+		echo "the root directory of one of projects in [${prjList}]." 1>&2
+		exit 2
+	fi
+fi
+
+echo "[$prj] at $CVSROOT, version 2.0"
+
+if [ $1 = import ] ; then
+	shift
+	echo cvsimport $*
+	cvsimport $*
+
+elif [ $1 = ndiff ] ; then
+	if [ \( $# != 2 \) -o \( ! -f "$2" \) ] ; then
+		echo "ndiff takes only one file (directory not allowed)." 1>&2
+		echo "Example:" 1>&2
+		echo "  xc ndiff filename" 1>&2
+		exit 2
+	fi
+
+	rls=$(cvs log -h $2 | grep head | cut --delimiter=' ' -f2)
+	if [ -z $rls ] ; then
+		echo error: $2 is unkown
+		exit 2
+	fi
+
+	echo cvs diff -r $rls $2
+	cvs diff -r $rls $2
+
+elif [ $1 = sync ] ; then
+	shift
+	xc-sync $@
+elif [ $1 = fix ] ; then
+	if [ "$(head -1 CVS/Repository)" != "." ] ; then
+		echo "fix must execute at the root"
+		exit 2
+	fi
+
+	function fixDir
+	{
+		if [ -d $1 ] ; then
+			local prefix
+			prefix=${2%/}
+			if [ -f $1/CVS/Repository ] ; then
+				(
+					cd $1
+					echo $prefix > CVS/Repository
+					local dir
+					for dir in * ; do
+						if [ -d $dir ] ; then
+							fixDir $dir $prefix/$dir
+						fi
+					done
+				)
+			fi
+		fi
+	}
+
+	shift
+
+	for dir in $* ; do
+		fixDir $dir $dir
+	done
+else
+	for cmd in add commit ci ; do
+		if [ $1 = $cmd ] ; then
+			msg=
+			if [ "$2" == "-m" ] ; then
+				msg=$3
+				shift 2
+			elif [ $1 != add ] ; then
+				echo "enter the log message: "
+				read msg
+			fi
+
+			shift
+			echo cvs $cmd -m \'"$msg"\' $*
+			cvs $cmd -m "$msg" $*
+			exit #done
+		fi
+	done
+
+	echo cvs $*
+	cvs $*
+fi

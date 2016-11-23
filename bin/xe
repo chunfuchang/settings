@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# Tom M. Yeh
+# Copyright (C) Potix Corporation. All Rights Reserved.
+
+if [ \( $# = 0 \) -o \( "$1" = "-h" \) -o \( "$1" = "--help" \) ] ; then
+	echo "Usage:"
+	echo "   xe filename"
+	echo
+	echo "Edit the specified file by use f to search."
+	echo "Try 'f --help' for more information"
+	echo
+	echo "Example:"
+	echo "  xe I3Exc"
+	echo "  xe *Excep"
+	echo "  xe abc/def/I3Exc"
+else
+	for ptn in $* ; do
+		flnm=$(f "$ptn")
+		if [ $? = 0 ] ; then
+			if [ -f $flnm ] ; then
+				ue $flnm
+			else
+				echo "$flnm is not a file" 1>&2
+			fi
+		fi
+	done
+fi

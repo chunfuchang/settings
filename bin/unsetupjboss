@@ -1,0 +1,72 @@
+#!/bin/bash
+#
+#{{IS_NOTE
+#
+# Authors: Tom M. Yeh
+# Contributors:
+# Create Date: 2001/10/17 05:46PM
+# Purpose: un-setup JBoss
+# Description:
+#	Execute 'unsetupjboss -h' to know how to use.
+# History:
+#	10/17/2001	Tom M. Yeh, created
+#
+#}}IS_NOTE
+#
+# Copyright (C) 2001 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+function showhelp
+{
+	echo "unsetupjboss - unsetup JBoss configurations"
+	echo "Copyright (C) 2001 Potix Corporation. All Rights Reserved."
+	echo
+	echo "Usage:"
+	echo "  unsetupjboss [-h] [--help]"
+	echo
+	echo "Options:"
+	echo " -h or --help"
+	echo "    Show this message."
+	echo
+	echo "* It undo what is done by setupjboss"
+}
+
+#-- check options
+if [ \( "$1" = "--help" \) -o \( "$1" = "-h" \) ] ; then
+	showhelp
+	exit 0
+fi
+
+#-- make sure /usr/jboss symbolic link
+if [ ! -d /usr/jboss ] ; then
+	echo /usr/jboss not found
+	echo make sure to create a proper symbolic link
+	exit 2
+fi
+
+#setup one server named "potix" under the /usr/jboss/server
+if [ ! -d /usr/jboss/server/potix ] ; then
+	echo make sure your jboss has been setup by setupjboss
+	exit 3
+fi
+if [ -d /usr/jboss/server/potix ] ; then
+	echo remove /usr/jboss/server/potix
+	rm -rf /usr/jboss/server/potix
+	if [ -d /usr/jboss/server/potix ] ; then
+		echo Failed to remove /usr/jboss/server/potix
+		echo Do you shutdown the server?
+		exit 4
+	fi
+fi
+if [ -f /usr/jboss/bin/run2.bat ] ; then
+	echo restore /usr/jboss/bin/run.bat
+	rm -rf /usr/jboss/bin/run.bat
+	mv /usr/jboss/bin/run2.bat /usr/jboss/bin/run.bat
+fi
+if [ -f /usr/jboss/bin/run2.sh ] ; then
+	echo restore /usr/jboss/bin/run.sh
+	rm -rf /usr/jboss/bin/run.sh
+	mv /usr/jboss/bin/run2.sh /usr/jboss/bin/run.sh
+fi

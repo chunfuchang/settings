@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+#	updnewer cmd dir...
+#
+# Tom M. Yeh, June 2, 2000
+# Potix Corporation
+
+case $# in
+0 | 1)	echo 'Usage: updnewer cmd dir...' 1>&2
+	echo "  Update files in the specified directories that"
+	echo "  are modified in two hours by the specified command"
+	echo "  Example: updnewer "strip -g" /bin" 1>&2
+	exit 2;;
+esac
+
+cmd=$1
+shift
+
+find $* -type f -mmin -120 -perm -555 -print0 | xargs -0 -r $cmd

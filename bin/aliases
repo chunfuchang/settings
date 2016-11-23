@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# Tom M. Yeh
+# Copyright (C) Potix Corporation. All Rights Reserved.
+
+aliasfl=$0
+aliasfl=${aliasfl%/*}/script/aliases
+
+if [ \( $# = 0 \) -o \( A$1 = A-h \) -o \( A$1 = A--help \) ] ; then
+	echo "Usage:"
+	echo "   aliases alias"
+	echo
+	echo "Echos the value of the alias found in $aliasfl"
+	echo "Exit status is 0 if match, 1 if no match"
+	exit 0
+fi
+
+if [ ! -f $aliasfl ] ; then
+	echo $aliasfl is not found
+	exit 1
+fi
+
+target=$1
+grep "^$target=" $aliasfl >/dev/null
+if [ $? = 0 ] ; then
+	flnm=$(grep "^$target=" $aliasfl | cut -d '=' -f2)
+	if [ "${flnm#\~/}" != "$flnm" ] && [ "$HOME" != "" ]; then
+		flnm="${HOME}${flnm#\~}"
+	fi
+	echo "$flnm"
+	exit 0
+else
+	exit 1
+fi

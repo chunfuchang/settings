@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# Updates scripts to the local drive
+#
+# Tom M. Yeh
+# Copyright (c) Potix Corporation
+#
+
+function upd
+{
+	cp -R -f -p -u -v /home/bin/$1 /home/$USER/bin/$1 
+}
+
+echo Update files from /home/bin to /home/$USER/bin
+
+if [ ! -d /home/$USER/bin ] ; then
+	mkdir -p /home/$USER/bin
+fi
+
+if [ ! -d /home/$USER/bin/script ] ; then
+	mkdir -p /home/$USER/bin/script
+fi
+if [ ! -d /home/$USER/bin/new.template ] ; then
+	mkdir -p /home/$USER/bin/new.template
+fi
+if [ ! -d /home/$USER/bin/jboss.template ] ; then
+	mkdir -p /home/$USER/bin/jboss.template
+fi
+
+cd /home/bin
+list="cd runjhat cleanjboss cleantomcat fixown aliases ckjava e.exe f grepdos ie.exe isdos new overwrite se ue wse.exe xe new.template/* script/aliases java.upload java.download setupjboss jboss.template/* releaserunec releasewe updlocal tomcat tomcat.bat tomcat4 xc xc-sync cvsimport"
+for fl in $list ; do
+	if [ -f "$fl" ] ; then
+		upd $fl
+	else
+		echo $fl is not a valid file
+	fi
+done

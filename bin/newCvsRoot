@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# Tom M. Yeh
+# Copyright (C) 2004 Potix Corporation. All Rights Reserved.
+
+if [ "$1" == "" ] || [ "$1" == "--help" ] ; then
+	echo "newCvsRoot Creates a new CVS repository"
+	echo "If the programming language is Java, use newCvsJavaRoot instead"
+	echo
+	echo "Usage:"
+	echo "	newCvsRoot dir-name"
+	exit 0
+fi
+
+tmpldir=$0
+tmpldir=${tmpldir%/*}/cvs.template
+
+prj=$1
+remotedir=//time/potix/rd/cvs/$prj
+localdir=~/prj/$prj
+if [ -d $remotedir ] ; then
+	echo "$remotedir already exists"
+	echo "Is it the directory you want to use for CVS files?"
+	read bOk
+	if [ "$bOk" != "y" ] ; then
+		exit 1
+	fi
+else
+	mkdir -p $remotedir
+fi
+
+if [ -d $localdir ] ; then
+	echo "$localdir already exists"
+	echo "Is it the directory you want to use for CVS files?"
+	read bOk
+	if [ "$bOk" != 'y' ] ; then
+		exit 1
+	fi
+else
+	mkdir -p $localdir
+fi
+
+cd $localdir
+cvs -d $remotedir init
+cd $localdir
+cvsPrjs=" $prj " xc co .
+cp $tmpldir/CVSROOT/* CVSROOT
+cvsPrjs=" $prj " xc add CVSROOT/cvsignore
+
+cvsPrjs=" $prj " xc ci -m ''
+cvsPrjs=" $prj " xc release -d CVSROOT

@@ -1,0 +1,108 @@
+#!/bin/bash
+#
+# Creates a source file
+#
+# Implemenation Notes:
+# It requires new.template/new.*, where you can use the following identifies
+# in the template:
+#	{user}, {filename}, {basename} and {date}
+#
+
+tmpldir=$0
+tmpldir=${tmpldir%/*}/new.template
+
+if [ $# != 1 ] ; then
+	echo "Usage:"
+	echo "  new filename"
+	echo
+	echo "It creates a new file and fills it with proper header depending on"
+	echo "its extension (and whether it starts with i_)."
+	echo "Then, invoke ue to open this new file."
+	echo
+	echo "It recognizes the following extensions:"
+	for fl in $tmpldir/new.* ; do
+		exts="$exts ${fl##*/new}"
+	done
+	echo $exts
+	exit 0
+fi
+
+flnm=$1
+if [ -e "$flnm" ] ; then
+	echo Failed: $flnm already exists
+	exit -1
+fi
+
+flbs=${flnm#**/}
+pth=${flnm%/*}
+pkg=$(pwd)
+
+if [ "${flnm##*.}" = "$flnm" ] ; then
+	tmpl=$tmpldir/new
+	ext=
+else
+	#Example: if flnm is abc.html.jsp, then ext1 is .jsp and ext is .html.jsp
+	#ext1: 
+	t=${flnm%.*}
+	ext1=${flnm#$t}
+	t=${t%.*}
+	ext=${flnm#$t}
+
+	if [ "$ext1" = ".jsp" ] && [ "${pkg#*/java/}" != "${pkg}" ] ; then
+		if [ "${flbs#i_}" = "$flbs" ] ; then
+			pref=$tmpldir/m1_new
+		else
+			pref=$tmpldir/m1_i_new
+		fi
+	else
+		if [ "${flbs#i_}" = "$flbs" ] ; then
+			pref=$tmpldir/new
+		else
+			pref=$tmpldir/i_new
+		fi
+	fi
+
+	tmpl=$pref$ext
+	if [ ! -f $tmpl ] ; then
+		tmpl=$pref$ext1
+		ext=$ext1
+	fi
+fi
+if [ ! -f $tmpl ] ; then
+	echo Failed: the template, $tmpl, not found
+	exit -1
+fi
+#echo template: $tmpl
+
+if [ "$pth" != "" ] && [ "$pth" != "$flnm" ] ; then
+	pkg=$pkg/$pth
+fi
+
+pth=${pkg#*com/}
+if [ "$pth" != "$pkg" ] ; then #containing com/
+	pth=com.$pth
+else	
+	pth=${pkg#*org/}
+	if [ "$pth" != "$pkg" ] ; then #contain org/
+		pth=org.$pth
+	else
+		pth=${pkg#*src/}
+		if [ "$pth" = "$pkg" ] ; then #not contain src/
+			if [ "${flnm%.x*}" = "$flnm" ] ; then #not .x*
+				echo "$flnm is not located under any subdir of com, org or src"
+				echo "No package is available"
+			fi
+			pth=
+		fi
+	fi
+fi
+
+pkg=${pth%/}
+pkg=${pkg//\//\\\.}
+
+fn=${flnm##*/}
+basename=${fn%$ext}
+scalatag=$(echo $basename | tr '_' '-')
+scalatag=$(echo $scalatag | tr 'Test' '.zul')
+cat $tmpl | sed -e "s/{user}/$USER/g"  -e "s/{year}/$(date '+ %Y')/g"  -e "s/{date}/$(date)/g" -e "s/{filename}/$fn/g" -e "s/{basename}/${fn%$ext}/g" -e "s/{package}/$pkg/g" -e "s/{scalatag}/$scalatag/g" > $flnm
+#ue $flnm

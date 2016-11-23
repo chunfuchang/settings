@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# Tom M. Yeh, 06/14/2002
+# Copyright (C) Potix Corporation. All Rights Reserved.
+
+if [ \( $# != 2 \) -o \( "$1" = "-h" \) -o \( "$1" = "--help" \) ] ; then
+	echo "Usage:"
+	echo "   diff filename1 filename2"
+	exit
+fi
+
+examdiff "`cygpath -wp $1`" "`cygpath -wp $2`" &

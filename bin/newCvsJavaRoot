@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# Tom M. Yeh
+# Copyright (C) 2004 Potix Corporation. All Rights Reserved.
+
+if [ "$1" == "" ] || [ "$1" == "--help" ] ; then
+	echo "newCvsJavaRoot Creates a new CVS repository for Java"
+	echo
+	echo "Usage:"
+	echo "	newCvsJavaRoot dir-name"
+	exit 0
+fi
+
+tmpldir=$0
+tmpldir=${tmpldir%/*}/cvs.template
+
+prj=$1
+newCvsRoot $prj
+
+localdir=~/prj/$prj
+cd $localdir
+
+echo "ZK Applications" > readme.txt
+echo $(date) >> readme.txt
+
+cp $tmpldir/java/* .
+rm -rf build.setting.local
+	#to avoid being added to CVS
+
+cvsPrjs=" $prj " xc add *
+cvsPrjs=" $prj " xc ci -m ''
+
+cp build.setting.local.sample build.setting.local

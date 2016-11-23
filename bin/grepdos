@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+#	grepdos dir-name ...
+#		show files that are in DOS mode under the dir-name 
+#
+
+case $# in
+0)	echo 'Usage: grepdos ...' 1>&2
+	echo "  Show files that are in DOS format" 1>&2
+	echo "  The arguments are the same as find." 1>&2
+	echo "  Example: grepdos -name *.properties" 1>&2
+	exit 2;;
+esac
+
+for flnm in $(find $*)
+do
+	isdos $flnm
+	if [ $? = 0 ] 
+	then
+		echo $flnm
+	fi
+done

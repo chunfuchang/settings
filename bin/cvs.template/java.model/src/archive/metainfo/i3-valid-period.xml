@@ -1,0 +1,36 @@
+<!-- i3-valid-period.xml
+	$Id: i3-valid-period.xml,v 1.2 2004/12/07 13:51:03 tomyeh Exp $
+	Purpose:
+		Represents a valid period for match and tree beans.
+	Description:
+		
+	History:
+		Sat Jun 12 01:40:52     2004, Created by tomyeh@potix.com
+
+Copyright (C) 2004 Potix Corporation. All Rights Reserved.
+-->
+
+<member>
+	<name>validFrom</name>
+	<model-name>Date</model-name>
+	<comment><![CDATA[
+	[db, null, -r-w] The begin date of the valid period of this bean,
+	or null if valid since it is created
+
+	It is used only by QL, not visible to developer
+	]]></comment>
+	<nullable/>
+	<accessible>read</accessible>
+</member>
+<member>
+	<name>validThru</name>
+	<model-name>Date</model-name>
+	<comment><![CDATA[
+	[db, null, -r-w] The end date of the valid period of this bean,
+	or null if never expired.
+
+	It is used only by QL, not visible to developer
+	]]></comment>
+	<nullable/>
+	<accessible>read</accessible>
+</member>

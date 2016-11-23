@@ -1,0 +1,190 @@
+#!/bin/bash
+# java.download
+#
+#{{IS_NOTE
+#	$Id: tomyeh Exp $
+#	Purpose:
+#		Download Java libarary
+#	Description:
+#		
+#	History:
+#		Tue Apr 29 17:40:52     2004, Created by tomyeh@potix.com
+#}}IS_NOTE
+#
+#Copyright (C) 2004 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+
+setting=build.setting.local
+function helpit
+{
+	echo "java.download - download Java libraries and executable"
+	echo "Copyright (C) 2004 Potix Corporation. All Rights Reserved."
+	echo
+	echo "It downloads from the share directory to the current directory"
+	echo "Thus, projects located in this CVS could use libraries from other CVS"
+	echo
+	echo "You might specify local or remote to download from the specific location"
+	echo "Otherwise, both locations will be checked"
+	echo
+	echo "Usage:"
+	echo "  java.download [local | remote]"
+	exit 0
+}
+
+if [ "$1" == "--help" ] ; then
+	helpit
+fi
+
+if [ ! -f $setting ] ; then
+	echo "java.download: $setting not found"
+	echo "Make sure you are running java.download at the root of your checkout"
+	exit 1
+fi
+
+fromLocal=true
+fromRemote=true
+if [ "$1" == "local" ] ; then
+	fromRemote=false
+elif [ "$1" == "remote" ] ; then
+	fromLocal=false
+fi
+
+#Decide what dbgdir is (debug or release)
+dbgdir=$(grep D.ON $setting)
+dbgdir=${dbgdir#D.ON=}
+if [ "$dbgdir" == "true" ] ; then
+	dbgdir=debug
+elif [ "$dbgdir" == "false" ] ; then
+	dbgdir=release
+else
+	echo D.ON in $setting must be either true or false -- not $dbgdir
+	exit 1
+fi
+
+#prepare prjList
+if [ ! -f build.downloads ] ; then
+	prjList=
+	exports=
+else
+	prjList=" $(cat build.downloads | tr '\n' ' ') "
+	prjList=" $prjList "
+		#prefix and append with space
+	exports=$(grep export= build.downloads)
+	exports=${exports#export=}
+fi
+if [ ! -f build.downloads.ext ] ; then
+	if [ ! -f build.downloads ] ; then
+		echo Nothing copied since neither build.downloads nor build.downloads.ext defined
+		exit
+	fi
+	extList=
+else
+	extList=" $(cat build.downloads.ext | tr '\n' ' ') "
+fi
+
+function download
+{
+	local srcdir=$1
+	if [ ${srcdir#\~} != ${srcdir} ] ; then
+		srcdir=$HOME${srcdir#\~}
+	fi
+	if [ "$prjList" == "" ] ; then
+		echo "Skip binaries, dist/lib and export because build.downloads is not found"
+	else
+		#import bin
+		local srcbin=$srcdir/bin
+		echo "Download binaries from $srcbin..."
+		if [ -d $srcbin ] ; then
+			mkdir -p bin
+			for f in $srcbin/* ; do
+				fn=${f##*/}
+				if [ -f $f ] && [ "${prjList#* $fn }" != "$prjList" ] ; then
+					cp -f -p -u $f bin
+#				else
+#					echo "  Ignore $f (not in build.downloads)"
+				fi
+			done
+		fi
+
+		#import lib (exclude project listed in this file)
+		local srclib=$srcdir/dist/lib/$dbgdir
+		echo "Download libraries from $srclib..."
+		if [ -d $srclib ] ; then
+			mkdir -p dist/lib
+			for f in $srclib/* ; do
+				fn=${f##*/}
+				if [ -f $f ] && [ "${prjList#* $fn }" != "$prjList" ] ; then
+					if [ ! -d $f ] ; then
+						dstf=dist/lib/$fn
+						if [ ! -f $dstf ] || [ $f -nt $dstf ] ; then
+							echo "  Copy $f to dist/lib"
+							cp -f -p -u $f dist/lib
+						else
+							echo "  Skip $f since it is not newer"
+						fi
+					fi
+#				else
+#					echo "  Ignore $f (not in build.downloads)"
+				fi
+			done
+		fi
+	fi #if [ "$prjList" == "" ]
+	if [ "$exports" != "" ] ; then
+		IFS_OLD=$IFS
+		IFS=,
+		for exp in $exports; do
+			#import export
+			exp=${exp# }
+			exp=${exp% }
+			local srcexp=$srcdir/dist/export/$exp
+			echo "Download exports from $srcexp..."
+			if [ -d $srcexp ] ; then
+				mkdir -p dist/export
+				for f in $srcexp/* ; do
+					if [ -d $f ] ; then #make sure any file or directory available
+						cp -R -f -p -u $srcexp/* dist/export
+						break #use cp -R to copy all in once
+					fi
+				done
+			fi
+		done
+		IFS=$IFS_OLD
+	fi
+
+	#import lib/ext
+	local srcext=$srcdir/dist/lib/ext
+	echo "Download libraries from $srcext..."
+	if [ -d $srcext ] ; then
+		mkdir -p dist/lib/ext
+		for f in $srcext/* ; do
+			fn=${f##*/}
+			if [ -f $f ] && [ \( "$extList" == "" \) -o \( "${extList#* $fn }" != "$extList" \) ] ; then
+				cp -f -p -u $f dist/lib/ext
+			fi
+		done
+	fi
+}
+#download form local
+if [ "$fromRemote" == "true" ] ; then
+	sharedir=$(grep share.remote $setting)
+	sharedir=${sharedir#share.remote=}
+	if [ "$sharedir" = "" ] ; then
+		echo share.remote must be specified in $setting
+		exit 1
+	fi
+	download $sharedir
+fi
+
+#download from remote
+if [ "$fromLocal" == "true" ] ; then
+	sharedir=$(grep share.local $setting)
+	sharedir=${sharedir#share.local=}
+	if [ "$sharedir" = "" ] ; then
+		echo share.local must be specified in $setting
+		exit 1
+	fi
+	download $sharedir
+fi

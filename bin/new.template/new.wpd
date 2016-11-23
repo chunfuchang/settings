@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- {filename}
+	Purpose:
+		
+	Description:
+		
+	History:
+		{date}, Created by {user}
+
+Copyright (C) {year} Potix Corporation. All Rights Reserved.
+-->
+
+<package name="" language="xul/html">
+	<widget name=""/>
+	<!-- 
+	<script src="foo.js"/>
+	-->
+</package>

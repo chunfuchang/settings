@@ -1,0 +1,68 @@
+# This file affects handling of files based on their names.
+#
+# The -t/-f options allow one to treat directories of files
+# as a single file, or to transform a file in other ways on
+# its way in and out of CVS.
+#
+# The -m option specifies whether CVS attempts to merge files.
+#
+# The -k option specifies keyword expansion (e.g. -kb for binary).
+#
+# Format of wrapper file ($CVSROOT/CVSROOT/cvswrappers or .cvswrappers)
+#
+#  wildcard	[option value][option value]...
+#
+#  where option is one of
+#  -f		from cvs filter		value: path to filter
+#  -t		to cvs filter		value: path to filter
+#  -m		update methodology	value: MERGE or COPY
+#  -k		expansion mode		value: b, o, kkv, &c
+#
+#  and value is a single-quote delimited value.
+# For example:
+*.a -k 'b'
+*.o -k 'b'
+*.so* -k 'b'
+*.ani -k 'b'
+*.aps -k 'b'
+*.bmp -k 'b'
+*.dll -k 'b'
+*.doc -k 'b'
+*.ear -k 'b'
+*.exe -k 'b'
+*.exp -k 'b'
+*.gif -k 'b'
+*.ico -k 'b'
+*.idb -k 'b'
+*.ilk -k 'b'
+*.jar -k 'b'
+*.jpeg -k 'b'
+*.jpg -k 'b'
+*.lib -k 'b'
+*.lib -k 'b'
+*.mid -k 'b'
+*.midi -k 'b'
+*.obj -k 'b'
+*.odg -k 'b'
+*.odp -k 'b'
+*.ods -k 'b'
+*.odt -k 'b'
+*.opt -k 'b'
+*.pch -k 'b'
+*.pdb -k 'b'
+*.pdf -k 'b'
+*.ppt -k 'b'
+*.prc -k 'b'
+*.png -k 'b'
+*.rar -k 'b'
+*.res -k 'b'
+*.swf -k 'b'
+*.sxc -k 'b'
+*.sxd -k 'b'
+*.sxi -k 'b'
+*.sxw -k 'b'
+*.vcb -k 'b'
+*.vco -k 'b'
+*.war -k 'b'
+*.wav -k 'b'
+*.xls -k 'b'

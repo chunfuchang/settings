@@ -1,0 +1,198 @@
+#!/bin/bash
+# releasewe
+#
+#{{IS_NOTE
+#	$Id: releasewe,v 1.1.1.1 2004/04/27 12:12:51 tomyeh Exp $
+#	Purpose:
+#		
+#	Description:
+#		
+#	History:
+#		Tue Dec 31 17:21:50     2002, Created by andrewho@potix.com
+#}}IS_NOTE
+#
+#Copyright (C) 2002 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+
+if [ -d /home/download/javaapp ] ; then
+	defjbosszip=/home/download/javaapp/jboss/jboss-4.0.1.zip
+	defwebsar=/home/download/javaapp/jetty/jetty-5.1.0-jboss-4.0.0.sar
+else
+	defjbosszip=/lhome/download/jboss/jboss-4.0.1.zip
+	defwebsar=/lhome/download/jetty/jetty-5.1.0-jboss-4.0.0.sar
+fi
+
+function showhelp
+{
+	echo "releasewe - release files for the WE installer"
+	echo "Copyright (C) 2002-2004 Potix Corporation. All Rights Reserved."
+	echo
+	echo "Usage:"
+	echo "  releasewe [-h] [--help] [-nc] we_dir [jboss.zip] [jetty.sar]"
+	echo
+	echo "Options:"
+	echo " -h or --help"
+	echo "    Show this message."
+	echo " -nc"
+	echo "    No update and cleanup before building ~/prj/java."
+	echo "    If not specified, ~/prj/java will be updated and cleaned first."
+	echo " we_dir"
+	echo "    The directory under current directory to extract jboss files."
+	echo "    Default: we"
+	echo " jboss.zip"
+	echo "    The Jboss released zip file."
+	echo
+	echo "* The JBoss home is assumed to be /usr/jboss."
+	echo "* This program should unzip your jboss file and setup its configuration."
+	echo "  and prepare lib files to a directory named we_dir."
+}
+
+#-- check options
+if [ \( "$1" = "--help" \) -o \( "$1" = "-h" \) ] ; then
+	showhelp
+	exit 0
+fi
+
+if [ "$1" = "-nc" ] ; then
+	shift
+	noclean=true
+else
+	noclean=false
+fi
+
+#-- check arguments nu.
+#echo $#
+targetdir=$1
+if [ "$targetdir" = "" ] ; then
+	targetdir=we
+fi
+jbosszip=$2
+if [ "$jbosszip" = "" ] ; then
+	jbosszip=$defjbosszip
+fi
+websar=$3
+if [ "$websar" = "" ] ; then
+	websar=$defwebsar
+fi
+
+#-- check /usr/jboss
+if [ ! -d /usr/jboss ] ; then
+	echo /usr/jboss not found
+	echo Make sure to create a proper symbolic link /usr/jboss for JBoss
+	exit 2
+fi
+
+#-- check jboss zip file
+if [ ! -f "$jbosszip" ] ; then
+	echo "$jbosszip not found"
+	exit 2
+fi
+if [ ! -f "$websar" ] ; then
+	echo "$websar not found"
+	exit 2
+fi
+echo Use $jbosszip and $websar
+
+#-- check /usr/NSIS
+if [ ! -d /usr/NSIS ] ; then
+	echo /usr/NSIS not found
+	echo Make sure to install NSIS program and create a proper symbolic link /usr/NSIS
+	exit 2
+fi
+
+#-- check /tmp
+if [ ! -d /tmp ] ; then
+	echo /tmp not found
+	exit 2
+fi
+echo Generate the release to /tmp/$targetdir
+cd /tmp
+
+###
+OLDSTAMP=$(date +%m%d%H%M)
+if [ -d "$(pwd)/$targetdir" ] ; then	
+	echo "Move existed $targetdir to ${targetdir}.${OLDSTAMP}"
+	mv "$(pwd)/$targetdir" "$(pwd)/${targetdir}.${OLDSTAMP}"
+fi
+echo "===Unzip the jboss file."
+unzip -q -d "$(pwd)/$targetdir" "$jbosszip"
+#find the jboss unzip directory and rename it to "JBoss"
+JDIR=""
+for jbossdir in $(pwd)/$targetdir/* ; do
+	if [ -d $jbossdir ] ; then
+		if [ "$JDIR" != "" ] ; then
+			echo Make sure to unzip JBoss to one directory
+			exit 2
+		fi
+		JDIR=${jbossdir##/*/} 
+	fi
+done
+if [ "$JDIR" = "" ] ; then
+	echo Make sure to unzip JBoss to a directory
+	exit 2
+fi 
+echo "===Move the $(pwd)/$targetdir/$JDIR directory to $(pwd)/$targetdir/jboss"
+mv "$(pwd)/$targetdir/$JDIR" "$(pwd)/$targetdir/jboss"
+
+###
+echo "===Relink the /usr/jboss the new jboss."
+OLDJBOSS=$(cygpath -mp /usr/jboss)
+rm /usr/jboss
+ln -s "$(pwd)/$targetdir/jboss" /usr/jboss
+
+###
+echo "===Invoke setupjboss."
+setupjboss release $websar
+
+###
+echo "===Invoke build to setup we config & lib."
+PWDP=$(pwd)
+cd ~/prj/java
+if [ "$noclean" != "true" ] ; then
+	xc up
+	~/prj/java/build clean
+else
+	java.download
+fi
+~/prj/java/build unzip
+cp ~/prj/java/dist/conf/i3-log.conf.local.sample /usr/jboss/server/potix/conf/i3-log.conf
+
+###
+echo "===Relink the /usr/jboss back to the original."
+JPU=$(cygpath -u $OLDJBOSS)
+rm /usr/jboss
+ln -s "$JPU" /usr/jboss
+
+###
+###Please modify here for files not in the jboss
+###
+echo "===Copy some files for installer."
+echo cp ~/prj/java/i3e/src/installer/win/we.nsi "$PWDP/$targetdir"
+cp ~/prj/java/i3e/src/installer/win/we.nsi "$PWDP/$targetdir"
+
+echo cp ~/prj/java/i3e/src/installer/win/readme/*.txt "$PWDP/$targetdir"
+cp ~/prj/java/i3e/src/installer/win/readme/*.txt "$PWDP/$targetdir"
+
+echo cp ~/prj/java/i3e/src/installer/win/license/*.txt "$PWDP/$targetdir"
+cp ~/prj/java/i3e/src/installer/win/license/*.txt "$PWDP/$targetdir"
+
+echo cp ~/prj/java/i3e/src/installer/win/splash/potix.bmp "$PWDP/$targetdir/splash.bmp"
+cp ~/prj/java/i3e/src/installer/win/splash/potix.bmp "$PWDP/$targetdir/splash.bmp"
+if [ ! -d "$PWDP/$targetdir/bin" ] ; then
+	mkdir "$PWDP/$targetdir/bin"
+fi
+
+echo cp ~/prj/java/i3e/src/installer/win/bin/we.exe "$PWDP/$targetdir/bin"
+cp ~/prj/java/i3e/src/installer/win/bin/we.exe "$PWDP/$targetdir/bin"
+#cp ~/prj/java/bin/start-pgsrv* "$PWDP/$targetdir/bin"
+#cp ~/prj/java/bin/stop-pgsrv* "$PWDP/$targetdir/bin"
+#cp ~/prj/java/bin/remove-pgsrv* "$PWDP/$targetdir/bin"
+
+###
+echo "===Invoke the NSIS compiler."
+ue "$PWDP/$targetdir/we.nsi"
+NSIS="/usr/NSIS/makensisw"
+se "$NSIS"

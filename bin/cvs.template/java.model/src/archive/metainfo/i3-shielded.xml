@@ -1,0 +1,21 @@
+<!-- i3-shielded.xml
+	$Id: i3-shielded.xml,v 1.5 2004/12/07 13:51:03 tomyeh Exp $
+	Purpose:
+		Defining members required by beans that implement Shielded
+	Description:
+		
+	History:
+		Tue Jun  8 15:58:55     2004, Created by tomyeh@potix.com
+
+Copyright (C) 2004 Potix Corporation. All Rights Reserved.
+-->
+
+<member>
+	<name>shield</name>
+	<comment><![CDATA[
+	[db] The shield that protects the access of this bean.
+	]]></comment>
+	<model-name>com.potix.id.security.Policy</model-name>
+	<reference/><!-- not CMR because a policy might shield many beans -->
+	<init>com.potix.id.security.PolicyBinders.getShield(self())</init>
+</member>

@@ -1,0 +1,1 @@
+debug release codegen *.log *.tmp *.plg *.idb *.ilk *.vco *.exp *.pch *.pdb *.ncb *.res *.stackdump Debug vssver.scc core *~ *.bak *.exe *.obj *.o *.class *.war *.jar *.ear *~ ~* *.local .svn

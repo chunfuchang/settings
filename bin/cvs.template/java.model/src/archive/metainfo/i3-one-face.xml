@@ -1,0 +1,18 @@
+<!-- i3-one-face.xml
+	$Id: i3-one-face.xml,v 1.2 2004/12/07 13:51:01 tomyeh Exp $
+	Purpose:
+		Defines the face method that implements com.potix.i3.util.group.One
+	Description:
+		
+	History:
+		Thu Jun 10 18:28:33     2004, Created by tomyeh@potix.com
+
+Copyright (C) 2004 Potix Corporation. All Rights Reserved.
+-->
+
+<face-method>
+	<method>java.util.List getGroups();</method>
+	<comment><![CDATA[
+	Returns a list of groups that this object belongs to.
+	]]></comment>
+</face-method>

@@ -1,0 +1,190 @@
+#!/bin/bash
+# xc-sync
+#
+#{{IS_NOTE
+#	$Id: $
+#	Purpose:
+#		Sync the checkout files with CVS repository
+#	Description:
+#		xc sync [-l] [-f]
+#		-l	locally (i.e., not recursively sync)
+#		-f	force (i.e., no asking whether to remove a file)
+#	History:
+#		Wed Jan  8 15:45:27     2003, Created by tomyeh@potix.com
+#}}IS_NOTE
+#
+#Copyright (C) 2002-2004 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+autoAdd=" codegens format version deploy classpath "
+	#The first and last character must be space
+autoAddExt=".java .xml .xsl .html .properties .jsp .jsf .js .tld .bsh .bs .sxd .vsd .gif .jpg .png .profile .vm .jj .jjt .rpt .rql .libs .css .xls .doc .pps .pdf .swf .dwt .lbi "
+	#The first and last character must be space
+norecur=0
+force=0
+
+function syncPwd
+{
+	#remove files that have been removed by other people
+	local cvsdir=$(head -1 CVS/Root)/$(head -1 CVS/Repository)
+	cvsdir=${cvsdir#:*:}
+	#echo sync $cvsdir
+
+	for fl in $cvsdir/Attic/* ; do
+		if [ -f "$fl" ] ; then
+			local flbase="${fl##*/}"
+			local flbase="${flbase%,v}"
+
+			#in Attic and in local, but not in cvs
+			if [ \( -f "$flbase" \) -a \( ! -f "$cvsdir/$flbase" \) ] ; then
+				echo "$(pwd)/$flbase is removed from CVS repository by other people."
+				#Don't remove it automatically because it is too dangerous
+				#if [ "$force" = "1" ] ; then
+				#	rm -rf $flbase
+				#else
+					echo "Would you like to remove it from LOCAL FILESYSTEM now?"
+					read bRemoved
+					if [ "$bRemoved" = "y" ] ; then
+						rm -f "$flbase"
+					fi
+				#fi
+			fi
+		fi
+	done
+
+	#check any file being added but not yet checkout
+	for fl in $cvsdir/* ; do
+		local flbase="${fl##*/}"
+		if [ -f "$fl" ] ; then
+			local flbase="${flbase%,v}"
+			if [ ! -f "$flbase" ] ; then
+				echo "${fl%,v} (file) is not updated (use 'xc up' if necessary)"
+			fi
+		elif [ -d "$fl" ] ; then
+			if [ "$flbase" != "Attic" ] && [ "$flbase" != "CVSROOT" ] ; then
+				if [ ! -e "$flbase" ] ; then
+					echo "$fl (directory) is not checkout (use 'xc co' if necessary)"
+				fi
+			fi
+		fi
+	done
+
+	#add new files
+	if [ -f CVS/Entries.Log ] ; then
+		echo "$(pwd)/CVS/Entries.Log found. This program doesn't handle it,"
+		echo "so you'd better to update the directories in it:"
+		cat CVS/Entries.Log
+	fi
+	local chkouts=" $(grep '^/' CVS/Entries | cut -d/ -f2 | tr '\n' ' ') "
+	local chkoutDirs=" $(grep '^D/' CVS/Entries | cut -d/ -f2 | tr '\n' ' ') "
+	for fl in * ; do
+		local flbase="${fl##*/}"
+		if [ -f "$fl" ] ; then
+			if [ "${chkouts#* $flbase }" = "$chkouts" ] ; then
+				local flext="${fl##*.}"
+				skip=1
+				if [ "${fl#junit*.properties}" != "$fl" ] ; then #skip junitxxx.properties
+					skip=1
+				elif [ "${autoAdd#* $flbase }" != "$autoAdd" ] ; then
+					skip=0
+				elif [ "${autoAddExt#*.$flext }" != "$autoAddExt" ] ; then
+					skip=0
+				fi
+
+				#skip automatically generated files
+				if [ $skip = 0 ] ; then
+					echo add "$(pwd)/$fl"
+					xc add "$fl"
+				elif [ "${fl%.local}" = "$fl" ] ; then
+					echo "$(pwd)/$fl is ignored (add it manually if necessary)"
+				fi
+			elif [ ! -f "$cvsdir/$flbase,v" ] ; then
+				grep -l "Initial.$flbase" CVS/Entries > /dev/null
+				if [ $? = 1 ] ; then #not found
+					echo "$fl found in CVS/Entries, but not found in $cvsdir"
+				fi
+			fi
+		elif [ -d "$fl" ] && [ "$fl" != "CVS" ] && [ "$fl" != "codegen" ] \
+		&& [ "$fl" != "debug" ] && [ "$fl" != "release" ]; then
+			if [ "${chkoutDirs#* $flbase }" = "$chkoutDirs" ] ; then
+				echo "$(pwd)/$fl is ignored (use 'xc import' if necessary)"
+			elif [ ! -d "$cvsdir/$flbase" ] ; then
+				echo "$fl found in CVS/Entries, but not found in $cvsdir"
+			fi
+		fi
+	done
+
+	#remove non-existent checkout files
+	for fl in $chkouts ; do
+		if [ ! -e "$fl" ] ; then
+			if [ "$force" = "1" ] ; then
+				xc remove $fl
+			else
+				echo "removing $(pwd)/$fl from CVS repository (y/N)?"
+				read bRemove
+				if [ "$bRemove" = "y" ] ; then
+					xc remove $fl
+				fi
+			fi
+		fi
+	done
+}
+
+function syncRecur
+{
+	pushd . > /dev/null
+	cd $1
+	syncPwd
+	popd > /dev/null
+
+	for dir in $1/* ; do
+		if [ -f "$dir/CVS/Entries" ] ; then
+			if [ "$2" == "true" ] ; then
+				echo sync $dir
+			fi
+			syncRecur $dir
+		fi
+	done
+}
+
+if [ "$CVSROOT" == "" ] || [ ! -f CVS/Root ] ; then
+	echo xc-sync is invoked implicitly by xc
+	echo 'Exceute "xc sync" for more'
+	exit 1
+fi
+
+if [ "$1" = "-l" ] ; then
+	norecur=1
+	shift
+fi
+if [ "$1" = "-R" ] ; then
+	shift
+fi
+if [ "$1" = "-f" ] ; then
+	force=1
+	shift
+fi
+if [ $# = 0 ] ; then
+	dirs=.
+else
+	dirs=$*
+fi
+
+for dir in $dirs ; do
+	if [ -d "$dir" ] && [ "$dir" != "CVS" ]; then
+		dir=${dir%/}
+		if [ ! -f "$dir/CVS/Entries" ] ; then
+			echo "$dir/CVS/Entries doesn't exist; make sure $dir is checked out" 1>&2
+		elif [ "$norecur" = "1" ] ; then
+			(
+				cd $dir
+				syncPwd
+			)
+		else
+			echo synchronizes $dir...
+			syncRecur $dir true
+		fi
+	fi
+done

@@ -1,0 +1,30 @@
+<!-- i3-period.xml
+	$Id: i3-period.xml,v 1.1.1.1 2004/06/21 04:00:21 tomyeh Exp $
+	Purpose:
+		The members used to implement com.potix.util.Period
+	Description:
+		
+	History:
+		Wed Sep 25 15:18:53  2002, Created by tomyeh@potix.com
+
+Copyright (C) 2002 Potix Corporation. All Rights Reserved.
+-->
+
+<member>
+	<name>fromDate</name>
+	<model-name>Date</model-name>
+	<comment><![CDATA[
+	[db, null] The begin date of the valid period of this bean, or null if
+	valid since it is created
+	]]></comment>
+	<nullable/>
+</member>
+<member>
+	<name>thruDate</name>
+	<model-name>Date</model-name>
+	<comment><![CDATA[
+	[db, null] The end date of the valid period of this bean,
+	or null if never expired.
+	]]></comment>
+	<nullable/>
+</member>

@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Invoke e under Cygwin
+#
+
+#echo ue invokes e.exe after converting the path under Cygwin
+
+if [ $# = 0 ] ; then
+	"subl"
+elif [ A$TERM = Acygwin ] ; then
+	for flnm in $* ; do
+		"subl" `cygpath -w "$flnm"` &
+	done
+else
+	#echo Your shell is not Cygwin! However, we try to run e.exe anyway
+	"subl" $*
+	#e $*
+fi

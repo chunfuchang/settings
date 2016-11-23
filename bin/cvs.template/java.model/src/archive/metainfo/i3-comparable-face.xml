@@ -1,0 +1,19 @@
+<!-- i3-comparable-face.xml
+	$Id: i3-comparable-face.xml,v 1.2 2004/12/07 13:50:59 tomyeh Exp $
+	Purpose:
+		Defines the face methods that are required to implement
+		java.lang.Comparable.
+	Description:
+		
+	History:
+		Fri Aug 30 12:39:07  2002, Created by tomyeh@potix.com
+
+Copyright (C) 2002 Potix Corporation. All Rights Reserved.
+-->
+
+<face-method>
+	<method>int compareTo(Object obj);</method>
+	<comment><![CDATA[
+	Compares with other object.
+	]]></comment>
+</face-method>

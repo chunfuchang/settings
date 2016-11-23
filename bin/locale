@@ -1,0 +1,79 @@
+#!/bin/bash
+# locale
+#
+#{{IS_NOTE
+#	$Id: $
+#	Purpose:
+#		
+#	Description:
+#		
+#	History:
+#		Mon Jun 21 18:29:25     2004, Created by andrewho@potix.com
+#}}IS_NOTE
+#
+#Copyright (C) 2004 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+
+#prepare prjList
+if [ ! -f build.projects ] ; then
+	echo build.projects not found, so no files will be copied
+	exit 1
+fi
+prjList="$(cat build.projects | tr '\n' ' ')"
+echo $prjList
+
+#projects
+for prj in $prjList ; do
+	pwdPrj=$(pwd)/$prj
+	if [ -d "$pwdPrj" ] ; then
+		flnm_list=$(find $prj -name "*.properties" -o -name "i3-install.xml" -o -name "*Menu*.xml" | grep /src)
+		for fl in $flnm_list ; do
+			if [ -f "$fl" ] ; then
+				dir=$1/${fl%/*}			
+				if [ ! -d "$dir" ] ; then
+					mkdir -p $dir
+				fi
+				cp $fl $dir
+			else
+				echo $fl is not a valid file
+			fi
+		done
+	fi
+done
+
+#navi
+pwdNavi=$(pwd)/navi
+if [ -d "$pwdNavi" ] ; then
+	flnm_list=$(find navi -not -name "Entries" -a -not -name "Repository" -a -not -name "Root" -a -not -name "CVS" -a -type f | grep /src)
+	for fl in $flnm_list ; do
+		if [ -f "$fl" ] ; then
+			dir=$1/${fl%/*}	
+			if [ ! -d "$dir" ] ; then
+				mkdir -p $dir
+			fi
+			cp $fl $dir
+		else
+			echo $fl is not a valid file
+		fi
+	done
+fi
+
+#dist
+pwdDist=$(pwd)/dist/conf/install
+if [ -d "$pwdDist" ] ; then
+	flnm_list=$(find dist/conf/install -name "*.xml")
+	for fl in $flnm_list ; do
+		if [ -f "$fl" ] ; then
+			dir=$1/${fl%/*}
+			if [ ! -d "$dir" ] ; then
+				mkdir -p $dir
+			fi
+			cp $fl $dir
+		else
+			echo $fl is not a valid file
+		fi
+	done
+fi

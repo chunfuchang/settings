@@ -1,0 +1,75 @@
+#!/bin/bash
+#
+#	cyginit
+#
+# Tom M. Yeh, June 2, 2000
+# Copyright (C) 2000-20002 Potix Coporation.
+
+function mymount
+{
+	if [ -d $2 ]
+	then
+		umount $2
+	fi
+	if [ ! -d $2 ]
+	then
+		mkdir -p $2
+	fi
+	mount -b -f $1 $2
+}
+
+function myln
+{
+	if [ -d $2 ]
+	then
+		echo ignore: $2 exists
+	else
+		ln -s $1 $2
+	fi
+}
+
+if [ -z "$USER" ]
+then
+	echo USER must be defined as your username
+	exit 2
+fi
+if [ -z "$WINDIR" ]
+then
+	echo cyginit can only be executed under Cygwin
+	exit 2
+fi
+
+echo "cyginit: Initializing the Cygwin environment"
+echo User is assumed to be $USER
+
+if [ ! -d /home ]
+then
+	mkdir /home
+	mkdir "/home/$USER"
+fi
+if [ ! -d /rhome ]
+then
+	mkdir /rhome
+fi
+if [ ! -d /lhome ]
+then
+	mkdir /lhome
+fi
+
+mymount //time/download /home/download
+mymount //time/potix    /home/potix
+mymount //time/bin      /home/bin
+mymount "//time/$USER"    "/rhome/$USER"
+mymount //time/httpd    /rhome/httpd
+
+mymount c: /c
+mymount d: /d
+mymount e: /f
+mymount f: /f
+
+mount
+
+echo "Now, invoke the following command to mount your local home to /home/$USER"
+echo "by changing /cygdrive/c/home to the proper path"
+echo "    mount -b /cygdrive/c/home/$USER /home/$USER"
+echo "    moutn -b /cygdrive/c/home /lhome"

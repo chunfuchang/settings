@@ -1,0 +1,82 @@
+#!/bin/bash
+#
+# Tom M. Yeh
+# Copyright (C) Potix Corporation. All Rights Reserved.
+
+exclude_ext=""
+
+if [ \( $# != 1 \) -o \( "$1" = "-h" \) -o \( "$1" = "--help" \) ] ; then
+	echo "Usage:"
+	echo "   f filename"
+	echo
+	echo "Find the specified file or directory under the current directory"
+	echo "You need only to specify the first few characters, and you can "
+	echo "specify wildcard."
+	echo
+	echo "The search sequence: (1) exact match, (2) with one of allowed extensions"
+	echo "(3) without any extension, and then (4) the first one in alphabetic order"
+	echo
+	echo "Excluded extensions: $exclude_ext"
+	echo
+	echo "If the filename contains a path (ie, /), then the searching is confined"
+	echo "to the specified directory. For example, 'f dir/fl' will search"
+	echo "fl* under the dir subdirectory (including all directories beneath)"
+	echo
+	echo "*/codegen/*, */build/*, */debug/*, */.svn/*, */CVS/* and /release/* will be skipped"
+	echo
+	echo "Example:"
+	echo "  f I3Exc"
+	echo "  f '*Excep'"
+	echo "  f 'abc/def/I3Exc"
+	exit 1
+fi
+
+tgtfl=$1
+tgtdir=${tgtfl%/*}
+tgtfl=${tgtfl##*/}
+if [ "$tgtdir" = "$1" ] ; then
+	tgtdir=.
+fi
+
+flnm_list=$(find ${tgtdir} -name "${tgtfl}*" -a -not -path '*/codegen/*' -a -not -path '*/debug/*' -a -not -path '*/build/*' -a -not -path '*/release/*' -a -not -path '*/.svn/*' -a -not -path '*/CVS/*' -a -not -path '*/api/*' -printf '%p ')
+if [ "$flnm_list" = "" ] ; then
+	echo "No filename starting with $tgtfl under $tgtdir is found" 1>&2
+	exit 1
+fi
+
+#1. full match
+for flnm in $flnm_list ; do
+	if [ ${flnm##*/} = "$tgtfl" ] ; then
+		echo $flnm
+		exit 0
+	fi
+done
+
+#2. No extension and not xx,t
+for flnm in $flnm_list ; do
+	if [ "${flnm%.*}" = "${flnm}" ] ; then #w/o extension?
+		echo $flnm
+		exit 0
+	fi
+done
+
+#3. Not excluded
+for flnm in $flnm_list ; do
+	found=false
+	for ext in $exclude_ext ; do
+		if [ "${flnm%$ext}" != "$flnm" ] ; then #with the giving extension?
+			found=true
+			break
+		fi
+	done
+	if [ "$found" = "false" ] ; then
+		echo $flnm
+		exit 0
+	fi
+done
+
+#4. The first one
+for flnm in $flnm_list ; do
+	echo $flnm
+	exit 0
+done

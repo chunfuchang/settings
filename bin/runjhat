@@ -1,0 +1,48 @@
+#!/bin/bash
+# runjhat
+#
+#{{IS_NOTE
+#	Purpose:
+#		Running jmap and jhat
+#	Description:
+#		
+#	History:
+#		Wed May 30 15:27:04     2007, Created by tomyeh
+#}}IS_NOTE
+#
+#Copyright (C) 2007 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+if [ "$1" = "-h" ] ; then
+	echo Usage:
+	echo runjhat [process-name]
+	echo
+	echo "process-name: The process name (not need to be complete)"
+	echo "  If omitted, tomcat is assumed"
+	exit 1
+fi
+
+if [ "$1" = "" ] ; then
+	procnm=tomcat
+else
+	procnm=$1
+fi
+
+pid=$(ps -a | grep $procnm | tr -s ' ' | cut -d ' ' -f5)
+if [ "$pid" = "" ] ; then
+	echo $procnm not found
+	exit 1
+fi
+echo "Dump process $pid"
+
+mkdir -p /tmp/jmap
+cd /tmp/jmap
+flnm=heap.bin
+
+if [ -f $flnm ] ; then
+	rm -f $flnm
+fi
+jmap -dump:format=b,file=$flnm $pid
+jhat $flnm

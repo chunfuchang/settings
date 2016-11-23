@@ -1,0 +1,41 @@
+#!/bin/bash
+#
+# To know changecvsroot, simply run changecvsroot without argument
+#
+# Tom M. Yeh, Feburary 20, 2001
+#
+
+function updRoot
+{
+	for subdir in * ; do
+		echo processing $2/$subdir
+
+		if [ -d "$subdir" ] ; then
+			case "$subdir" in
+			CVS)
+				cd CVS
+				if [ ! -e Root.bak ] ; then
+					mv Root Root.bak
+				fi
+				echo $1 > Root
+				cd ..;;
+			*)
+				cd "$subdir"
+				updRoot $1 "$2/$subdir"
+				cd ..;;
+			esac
+		fi
+	done
+}
+
+case $# in
+0)	echo "changecvsroot is used to update CVS/Root under each directory" 1>&2
+	echo "with a new location of CVS server." 1>&2
+	echo "You have to run changecvsroot each time you change the location" 1>&2
+	echo "of the CVS server, including protocol" 1>&2
+	echo "Example," 1>&2
+	echo "    changecvsroot :local:/home/potix/rd/cvs/i3" 1>&2
+	exit 2;;
+esac
+
+updRoot $1 `pwd`

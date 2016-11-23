@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+#	isdos flnm
+#		Check the specified file is in DOS mode
+
+case $# in
+1)	;;
+*)      echo 'Usage: isdos filename' 1>&2
+        echo "  Check the specified file is in DOS mode" 1>&2
+        echo "  The exit code is 0 if yes, 0 if not" 1>&2
+        echo "  Example: isdos mine.cpp" 1>&2
+        exit 2;;
+esac
+
+od -c -w400 -N400 $1 | grep -l '\\r  \\n' >/dev/null
+	#not working if the first line exceeds 400 characters

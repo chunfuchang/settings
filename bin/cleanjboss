@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# Clean up i3e.ear from JBoss
+#
+# Tom M. Yeh
+# Copyright (C) 2003 Potix Corporation. All Rights Reserved.
+echo rm -rf /usr/jboss/server/potix/deploy1/*.ear
+rm -rf /usr/jboss/server/potix/deploy1/*.ear
+echo 'rm -rf /usr/jboss/server/potix/tmp*'
+rm -rf /usr/jboss/server/potix/tmp*
+echo 'rm -rf /usr/jboss/server/potix/log/*'
+rm -rf /usr/jboss/server/potix/log/*

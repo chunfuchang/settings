@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Tom M. Yeh
+# Copyright (C) Potix Corporation. All Rights Reserved.
+
+function .cd
+{
+	target=$1
+	target=${target%/}
+	if [ "$target" = "" ] ; then
+		return 1
+	elif [ "$target" = "." ] ; then
+		return 0
+	elif [ "$target" = ".." ] ; then
+		cd ..
+		return 0
+	fi
+	if [ "${target#*/}" = "$target" ] ; then #containing no /
+		flnm=$(aliases "$target")
+		if [ $? = 0 ] ; then
+			echo "cd $flnm"
+			cd "${flnm/~/$HOME}"
+			return 0
+		fi
+	fi
+	flnm=$(f "$target")
+	if [ $? = 0 ] ; then
+		echo "$flnm found and cd"
+		if [ -d "$flnm" ] ; then
+			cd "$flnm"
+		else
+			cd "${flnm%/*}"
+		fi
+		return 0
+	fi
+	return 1
+}
+
+if [ \( $# = 0 \) -o \( "$1" = "-h" \) -o \( "$1" = "--help" \) ] ; then
+	echo "Usage:"
+	echo "   . cd alias"
+	echo "   . cd filename"
+	echo "   . cd dir/filename"
+	echo
+	echo "It first check it matches any alias. If so, change directory to it"
+	echo "The aliases are stored in /home/bin/script/aliases."
+	echo
+	echo "If not, it change to the directory that contains the specified file"
+	echo "or directory"
+	echo
+	echo "Searching is done by f. Try 'f --help' for more information"
+	echo "Basically, you don't have to specify the complete name."
+	echo
+	echo "NOTE: After this is executed, you could use '.cd' instead of '. cd'"
+	echo "because a function named .cd is defined"
+	echo "Or, you could put '. cd -d' in your .bash_profile"
+	echo
+	echo "Example:"
+	echo "  '. cd i3lb' change to '~/prj/java/i3lb/src/com/potix/i3'"
+	echo "  '. cd I3Exc' searches the first file named as 'I3Exc*'"
+	echo "  '. cd *Excep' searches the first file named as '*Excep*'"
+	echo "  '. cd isla/IsEx' searches the isla directory for the first file named 'IsEx*'"
+elif [ A$1 != A-d ] ; then
+	.cd $1
+fi

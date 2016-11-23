@@ -1,0 +1,5 @@
+WEB-INF/tld/jstl/c.tld
+WEB-INF/tld/jstl/fn.tld
+WEB-INF/tld/pat/**
+WEB-INF/tags/pat/**
+js/pat/**

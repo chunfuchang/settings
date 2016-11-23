@@ -1,0 +1,312 @@
+#!/bin/bash
+#
+#{{IS_NOTE
+#
+# Authors: Tom M. Yeh
+# Contributors:
+# Create Date: 2001/7/24 05:46PM
+# Purpose: Set up JBoss
+# Description:
+#	Execute 'setupjboss -h' to know how to use.
+# History:
+#	7/23/2001	Tom M. Yeh, created
+#	10/17/2001	Tom M. Yeh, enhance to modify configuration files directly
+#
+#}}IS_NOTE
+#
+# Copyright (C) 2001 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+
+if [ -d /home/download/javaapp ] ; then
+	defwebsar=/home/download/javaapp/jetty/jetty-5.1.0-jboss-4.0.0.sar
+else
+	defwebsar=/lhome/download/jetty/jetty-5.1.0-jboss-4.0.0.sar
+fi
+function showhelp
+{
+	echo "setupjboss - setup JBoss configurations"
+	echo "Copyright (C) 2001-2005 Potix Corporation. All Rights Reserved."
+	echo
+	echo "Usage:"
+	echo "  setupjboss [-h] [--help] [release] [jetty.sar]"
+	echo
+	echo "Options:"
+	echo " -h or --help"
+	echo "    Show this message."
+	echo " release"
+	echo "    Whether to setup for a release version (or debug version)."
+	echo
+	echo "Example:"
+	echo "  setupjboss $defwebsar"
+	echo
+	echo "* The JBoss home is assumed to be /usr/jboss."
+	echo "* This program should be executed each time after a new JBoss version"
+	echo "  is installed. It sets up JBoss to fulfil the I3 requirement."
+	echo "* After executing this program, you could then execute 'build islib'"
+	echo "  to copy I3 related configuration files and jars to JBoss."
+	echo "* To uninstall, execute unsetupjboss."
+}
+
+#-- check options
+if [ \( "$1" = "--help" \) -o \( "$1" = "-h" \) ] ; then
+	showhelp
+	exit 0
+fi
+if [ "$1" = "release" ] ; then
+	release=true
+	shift
+else
+	release=false
+fi
+
+websar=$1
+if [ "$websar" != "" ] ; then
+	if [ "${websar%.sar}" == "$websar" ] ; then
+		echo "jetty must end with .sar, not $websar"
+		exit 2
+	fi
+	if [ "${websar#/}" == "$websar" ] ; then
+		websar="$PWD/$websar"
+	fi
+	if [ ! -f $websar ] ; then
+		echo "$websar not found"
+		exit 2
+	fi
+else
+	websar=$defwebsar
+fi
+echo use $websar as web server
+
+#
+if [ ! -d /usr/jboss ] ; then
+	echo "/usr/jboss not found"
+	echo "make sure to create a proper symbolic link"
+	exit 2
+fi
+if [ -d /usr/jboss/server/potix ] ; then
+	echo "JBoss has been setup and you cannot set it up twice"
+	echo
+	echo "For more information:"
+	echo "	setupjboss -h"
+	exit 2
+fi
+
+###
+awkpath=$0
+awkpath=${awkpath%/*}/jboss.template
+if [ "$TERM" = "cygwin" ] ; then
+	awkpath=$(cygpath -u $awkpath)
+fi
+sedpath=$awkpath
+
+function sedfl
+{
+	local fl=$2
+	local conf=$1
+	if [ -f $fl ] ; then
+		echo sed $fl
+		sed -f $sedpath/$conf $fl | overwrite $fl
+	else
+		echo --------
+		echo $fl not found
+		echo --------
+	fi
+}
+function awkfl
+{
+	local fl=$2
+	local conf=$1
+	if [ -f $fl ] ; then
+		echo awk $fl
+		awk -f $awkpath/$conf $fl | overwrite $fl
+	else
+		echo --------
+		echo $fl not found
+		echo --------
+	fi
+}
+function rmfl
+{
+	if [ -e $fl ] ; then
+		echo "removing $1 ($2)"
+		rm -rf $1
+	else
+		echo --------
+		echo $1 not found
+		echo --------
+	fi
+}
+
+function setupRunBat
+{
+	if [ -f /usr/jboss/bin/run.bat ] ; then
+		mv /usr/jboss/bin/run.bat /usr/jboss/bin/run2.bat
+		cp $sedpath/run.bat /usr/jboss/bin/run.bat
+		mv /usr/jboss/bin/run.sh /usr/jboss/bin/run2.sh
+		cp $sedpath/run.sh /usr/jboss/bin/run.sh
+	else
+		echo /usr/jboss/bin/run.bat not found
+		exit 1
+	fi
+}
+
+###
+#setup run.bat
+setupRunBat
+
+###
+#setup one server named "potix" under the /usr/jboss/server
+if [ ! -d /usr/jboss/server/potix ] ; then
+	cp -rfp /usr/jboss/server/default /usr/jboss/server/potix
+	if [ $release = true ] ; then
+		rm -rf /usr/jboss/server/all
+		rm -rf /usr/jboss/server/default
+		rm -rf /usr/jboss/server/minimal
+		rm -rf /usr/jboss/client
+		rm -rf /usr/jboss/docs
+	else
+		rm -rf /usr/jboss/docs/tests
+	fi
+fi
+if [ ! -d /usr/jboss/server/potix/deploy0 ] ; then
+	mkdir /usr/jboss/server/potix/deploy0
+fi
+if [ ! -d /usr/jboss/server/potix/deploy1 ] ; then
+	mkdir /usr/jboss/server/potix/deploy1
+fi
+if [ ! -d /usr/jboss/server/potix/log ] ; then
+	mkdir /usr/jboss/server/potix/log
+fi
+if [ ! -d /usr/jboss/server/potix/export ] ; then
+	mkdir /usr/jboss/server/potix/export
+fi
+
+#modifying files
+
+if [ $release = true ] ; then
+	sedfl jboss-service-release.xml.sed /usr/jboss/server/potix/conf/jboss-service.xml
+else
+	sedfl jboss-service.xml.sed /usr/jboss/server/potix/conf/jboss-service.xml
+fi
+awkfl jboss-service.xml.awk /usr/jboss/server/potix/conf/jboss-service.xml
+cp -f $awkpath/login-config.xml /usr/jboss/server/potix/conf/login-config.xml
+awkfl log4j.xml.awk /usr/jboss/server/potix/conf/log4j.xml
+awkfl ejb-deployer.xml.awk /usr/jboss/server/potix/deploy/ejb-deployer.xml
+sedfl transaction-service.xml.sed /usr/jboss/server/potix/deploy/transaction-service.xml
+sedfl mail-service.xml.sed /usr/jboss/server/potix/deploy/mail-service.xml
+
+webdir=/usr/jboss/server/potix/deploy/jbossweb-jetty.sar
+if [ ! -d $webdir ] ; then
+	#Since 3.2.3, jett's sar is not jar-ed as a file, so...
+	mkdir -p $webdir
+	(
+		cd $webdir
+		if [ "$websar" == "" ] ; then
+			websar=$(ls ../jboss-*jetty-*.sar)
+			jar xf $websar
+			rm $websar
+		else
+			if [ "$TERM" = "cygwin" ] ; then
+				websar=$(cygpath -wp $websar)
+			fi
+			rm -rf ../jboss-*jetty-*.sar
+			jar xf $websar
+		fi
+		#remove any tomcat (default to Jboss since 3.2.4)
+		rm -rf ../jbossweb*tomcat*.sar
+
+		if [ -f ../jboss-*jetty-*.sar ] ; then
+			echo ---------
+			echo Warning:
+			echo Failed to remove $(pwd)/../jboss-*jetty-*.sar
+			echo You have to remove it manually
+			echo ---------
+		fi
+		if [ -f ../jbossweb*tomcat*.sar ] ; then
+			echo ---------
+			echo Warning:
+			echo Failed to remove $(pwd)/../jbossweb*tomcat*.sar
+			echo You have to remove it manually
+			echo ---------
+		fi
+	)
+fi
+awkfl webdefault.xml.awk $webdir/webdefault.xml
+sedfl jbossweb-service.xml.sed $webdir/META-INF/jboss-service.xml
+awkfl jbossweb-service.xml.awk $webdir/META-INF/jboss-service.xml
+rmfl $webdir/commons-logging.jar "use potix/lib"
+rmfl $webdir/commons-logging.properties "use potix/lib"
+#rmfl $webdir/commons-el.jar "use a special version in potix/lib"
+
+#remove redudant files to speed up deployment and reduce footprint
+rmfl /usr/jboss/server/potix/conf/jboss-minimal.xml "not used"
+rmfl /usr/jboss/server/potix/conf/jbossmq-state.xml "not used"
+rmfl /usr/jboss/server/potix/conf/standardjaws.xml "not used"
+rmfl /usr/jboss/server/potix/conf/standardjbosscmp-jdbc.xml "not used"
+
+rmfl /usr/jboss/server/potix/deploy/cache-invalidation-service.xml "not used"
+rmfl /usr/jboss/server/potix/deploy/client-deployer-service.xml "not used"
+rmfl /usr/jboss/server/potix/deploy/hsqldb*.xml "not used"
+rmfl /usr/jboss/server/potix/deploy/bsh-deployer.xml "not used" #4.0
+rmfl /usr/jboss/server/potix/deploy/jboss-aop.deployer "not used" #4.0
+rmfl /usr/jboss/server/potix/deploy/jboss-hibernate.deployer "not used" #4.0
+rmfl /usr/jboss/server/potix/deploy/jboss-hibernate.sar "not used" #3.2
+rmfl /usr/jboss/server/potix/deploy/jboss-ws4ee.sar "not used" #4.0
+rmfl /usr/jboss/server/potix/deploy/hibernate-deployer-service.xml "not used"
+rmfl /usr/jboss/server/potix/deploy/jbossweb-ejb.jar "not used"
+if [ -f /usr/jboss/server/potix/lib/javax.servlet.jar ] ; then
+	rmfl /usr/jboss/server/potix/deploy/jbossweb-jetty.sar/javax.servlet.jar
+fi
+rmfl /usr/jboss/server/potix/deploy/sqlexception-service.xml "not used"
+rmfl /usr/jboss/server/potix/deploy/jms/jbossmq-destinations-service.xml "not used"
+rmfl /usr/jboss/server/potix/deploy/jms/jbossmq-httpil.sar "seems: used to invoke jbossmq via HTTP"
+rmfl /usr/jboss/server/potix/deploy/jms/hsqldb-jdbc2-service.xml "not used"
+rmfl /usr/jboss/server/potix/deploy/jmx-console.war "console not safe"
+rmfl /usr/jboss/server/potix/deploy/jmx-ejb-connector-server.sar "not used"
+rmfl /usr/jboss/server/potix/deploy/jmx-invoker-adaptor-server.sar "not used"
+rmfl /usr/jboss/server/potix/deploy/jmx-invoker-service.xml "not used" #4.0
+#rmfl /usr/jboss/server/potix/deploy/jmx-rmi-adaptor.sar "used"
+	#required to do shutdown in Unix
+rmfl /usr/jboss/server/potix/deploy/http-invoker.sar "not used"
+rmfl /usr/jboss/server/potix/deploy/management "not used"
+rmfl /usr/jboss/server/potix/deploy/monitoring-service.xml "not used since 3.2.5"
+rmfl /usr/jboss/server/potix/deploy/properties-service.xml "not used"
+rmfl /usr/jboss/server/potix/deploy/schedule-manager-service.xml "not used"
+rmfl /usr/jboss/server/potix/deploy/scheduler-service.xml "not used"
+rmfl /usr/jboss/server/potix/deploy/snmp-adaptor.sar "not used"
+rmfl /usr/jboss/server/potix/deploy/user-service.xml "not used"
+rmfl /usr/jboss/server/potix/deploy/uuid-key-generator.sar "not used"
+
+rmfl /usr/jboss/server/potix/lib/autonumber-plugin.jar "not used"
+rmfl /usr/jboss/server/potix/lib/bcel.jar "not used" #4.0
+#rmfl /usr/jboss/server/potix/lib/jboss-management.jar "not used" #4.0
+	#required
+rmfl /usr/jboss/server/potix/lib/jboss-monitoring.jar "not used" #4.0
+rmfl /usr/jboss/server/potix/lib/jboss-jaxrpc.jar "not used" #4.0
+rmfl /usr/jboss/server/potix/lib/jbossmq.jar "not used" #4.0
+rmfl /usr/jboss/server/potix/lib/hsqldb-plugin.jar "not used"
+rmfl /usr/jboss/server/potix/lib/hsqldb.jar "not used"
+rmfl /usr/jboss/server/potix/lib/properties-plugin.jar "not used"
+rmfl /usr/jboss/server/potix/lib/scheduler-plugin-example.jar "not used"
+rmfl /usr/jboss/server/potix/lib/scheduler-plugin.jar "not used"
+rmfl /usr/jboss/server/potix/lib/snmp-adaptor.jar "not used"
+rmfl /usr/jboss/server/potix/lib/snmp-support.jar "not used"
+rmfl /usr/jboss/server/potix/lib/xalan.jar "no need since JDK 1.4"
+
+rmfl /usr/jboss/lib/commons-httpclient.jar "not used"
+rmfl /usr/jboss/lib/commons-logging.jar "not used"
+rmfl /usr/jboss/lib/gnu-regexp.jar "not used"
+rmfl /usr/jboss/lib/webdavlib.jar "not used"
+rmfl /usr/jboss/lib/crimson.jar "no need since JDK 1.4"
+rmfl /usr/jboss/lib/jaxp.jar "no need since JDK 1.4"
+rmfl /usr/jboss/lib/endorsed/xalan.jar "no need since JDK 1.4" #4.0
+
+rmfl /usr/jboss/server/potix/deploy/jms "NOT YET PORTED"
+
+echo .................................................................
+echo Now, execute 'cd ~/prj/java; ./build' to install the I3 files.
+echo NOTE: at least, you might execute './build i3e' to copy files
+echo To undo the setup, execute unsetupjboss

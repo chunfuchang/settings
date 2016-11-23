@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# Tar local files in ~/prj/java to ${RHOME}/backup. Then, the weekly backup
+# will store them to CD. It is used if you modify many files but not yet
+# check them in.
+#
+# Tom M. Yeh
+#
+if [ ! -d $RHOME/backup ] ; then
+	mkdir -p $RHOME/backup
+fi
+#uncomment to use date stamp
+#datestamp=$(date +%Y-%m-%d)
+datestamp=
+
+tar -c -z -f $RHOME/backup/local${datestamp}.tar.gz -X /home/bin/script/tar.exclude ~/prj/java ~/potix ~/todo

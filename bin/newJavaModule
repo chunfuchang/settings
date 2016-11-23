@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# Tom M. Yeh
+# Copyright (C) 2004 Potix Corporation. All Rights Reserved.
+
+if [ $# != 2 ] || [ "$1" == "--help" ] ; then
+	echo "newJavaModule Creates a new Java module"
+	echo
+	echo "Usage:"
+	echo "	newJavaModule type module-name"
+	echo
+	echo "type"
+	echo "  If lib, a module is created as a library."
+	echo "  If model, a module is created to hold i3-model.xml and relevant."
+	echo "  If web, a module is created to hold JSP, i3-doc.xml and relevant."
+	echo "  If wtest, an unit-test module is created to test thru web."
+	echo "  If prototype, a HTML-based prototype module is created."
+	exit 0
+fi
+
+if [ -f CVS ] || [ ! -f build.target.xml ] ; then
+	echo "newJavaModule must execute under the root"
+	exit 1
+fi
+
+tmpldir=$0
+tmpldir=${tmpldir%/*}/cvs.template
+
+if [ "$1" == "model" ] ; then
+	srcdir=$tmpldir/java.model
+elif [ "$1" == "lib" ] ; then
+	srcdir=$tmpldir/java.lib
+elif [ "$1" == "web" ] ; then
+	srcdir=$tmpldir/java.web
+elif [ "$1" == "wtest" ] ; then
+	srcdir=$tmpldir/java.wtest
+elif [ "$1" == "prototype" ] ; then
+	srcdir=$tmpldir/prototype
+else
+	echo "Illegal type: $1"
+	exit 1
+fi
+
+cp -R -p -u -f "$srcdir" "$2"
+
+if [ "$1" == "model" ] || [ "$1" == "lib" ] ; then
+	(
+		if [ "$1" == "model" ] ; then
+			cd "$2/src/archive/metainfo"
+			new i3-model.xml
+		fi
+	)
+	ue $2/src/archive/META-INF/MANIFEST.MF
+#elif [ "$1" == "web" ] ; then
+	
+elif [ "$1" == "wtest" ] ; then
+	ue $2/cactus.properties $2/src/archive/META-INF/MANIFEST.MF
+fi

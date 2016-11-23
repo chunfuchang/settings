@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+#	dos2unix dir-name ...
+#		Change files under specified directories to unix mode
+#
+
+case $# in
+0)	echo 'Usage: dos2unix ...' 1>&2
+	echo "  Change DOS format into Unix format" 1>&2
+	echo "  The arguments are the same as find." 1>&2
+	echo "  Example: dos2unix -name *.properties" 1>&2
+	exit 2;;
+esac
+
+for flnm in $(find $* -iname \*$extnm)
+do
+	isdos $flnm
+	if [ $? = 0 ]
+	then
+		echo update $flnm
+		cat $flnm | tr -d '\r' | overwrite $flnm
+	fi
+done

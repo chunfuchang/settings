@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+#	cfshd working-dir makefile
+#		output "-C working-dir -f makefile" which can be used in makefile script.
+#		"${MAKE} `cfshd working-dir makefile`" is equal to 
+#		"${MAKE} -C working-dir -f makefile" except that  
+#		cfshd will check if specified makefile exist.
+#		if yes, it will use that makefile
+#		If not, it will use the coresponding one in shadow directory
+#
+#	20000211, Henri Chen: Created
+#	Copyright (C) 2000 Potix Corporation
+
+if [ -z "$1" ]
+then
+	echo "output \"-C working-dir -f makefile\" which can be used in makefile script."
+	echo "\"\${MAKE} \`cfshd working-dir makefile\`\" is equal to" 
+	echo "\"\${MAKE} -C working-dir -f makefile\" except that"
+	echo "cfshd will check if specified makefile exist."
+	echo "if yes, it will use that makefile"
+	echo "If not, it will use the coresponding one in shadow directory"
+else
+	echo "-C $1 -f `shd $1/$2`"
+fi

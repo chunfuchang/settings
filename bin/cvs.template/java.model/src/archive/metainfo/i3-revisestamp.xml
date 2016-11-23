@@ -1,0 +1,51 @@
+<!-- i3-revisestamp.xml
+	$Id: i3-revisestamp.xml,v 1.3 2004/12/08 07:29:33 tomyeh Exp $
+	Purpose:
+		Defining the members required by any bean that implements
+		com.potix.i3.util.ReviseStamp (without extending from another bean)
+	Description:
+		To use this, idm's i3-model must be imported
+	History:
+		Fri Aug 30 12:29:28  2002, Created by tomyeh@potix.com
+
+Copyright (C) 2002 Potix Corporation. All Rights Reserved.
+-->
+
+<member>
+	<name>creator</name>
+	<comment><![CDATA[
+	[db, null] The user that creates this bean.
+	]]></comment>
+	<model-name>weakref.com.potix.id.UserAccount</model-name>
+		<!-- neither CMR nor reference because a user account might be removed -->
+	<accessible>read</accessible>
+	<init>com.potix.id.security.SecurityService.brokerX().getCurrentUserAccount()</init>
+	<nullable/><!-- this is a special case: happans during install idm -->
+</member>
+<member>
+	<name>created</name>
+	<comment><![CDATA[
+	[db] When this bean is created.
+	]]></comment>
+	<model-name>Date</model-name>
+	<accessible>read</accessible>
+</member>
+<member>
+	<name>lastModifier</name>
+	<comment><![CDATA[
+	[db, null] The user that is the last one modifying this bean.
+	]]></comment>
+	<model-name>weakref.com.potix.id.UserAccount</model-name>
+		<!-- neither CMR nor reference because a user account might be removed -->
+	<accessible>read</accessible>
+	<init>com.potix.id.security.SecurityService.brokerX().getCurrentUserAccount()</init>
+	<nullable/><!-- this is a special case: happans during install idm -->
+</member>
+<member>
+	<name>lastModified</name>
+	<comment><![CDATA[
+	[db] When this bean is last modified.
+	]]></comment>
+	<model-name>Date</model-name>
+	<accessible>read</accessible>
+</member>

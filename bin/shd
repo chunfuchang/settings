@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+#	shd	file-name
+#		check if specified file-name exist.
+#		if yes, output the file-name
+#		If not, output the coresponding one in shadow directory
+#
+#	20000211, Henri Chen: Created
+#	Copyright (C) 2000 Potix Corporation
+
+if [ -z "$1" ]
+then
+	echo "shd file-name"
+	echo "check if specified file-name exist."
+	echo "  If yes, output the file-name"
+	echo "  If not, output the coresponding one in shadow directory"
+else
+	if [ -e "$1" ]; then
+		pwd | tr -d "\n"
+		echo "/$1"
+	else
+		pwd | sed -e "s/^.*$(whoami)\/prj/\/shdprj/" | tr -d "\n"
+		echo "/$1"
+	fi
+fi

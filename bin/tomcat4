@@ -1,0 +1,30 @@
+#!/bin/bash
+# tomcat
+#
+#{{IS_NOTE
+#	$Id: $
+#	Purpose:
+#		
+#	Description:
+#		
+#	History:
+#		Fri Jan  6 09:50:06     2006, Created by tomyeh@potix.com
+#}}IS_NOTE
+#
+#Copyright (C) 2006 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+if [ "$1" = "start" ] ; then
+	shift 1
+	net start "Apache Tomcat 4.1" $*
+elif [ "$1" = "stop" ] ; then
+	shift 1
+	net stop "Apache Tomcat 4.1" $*
+else
+	echo "Usage:"
+	echo "  tomcat start"
+	echo "  tomcat stop"
+	exit 0
+fi

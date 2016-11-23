@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+#{{IS_NOTE
+#
+# Authors: Tom M. Yeh
+# Contributors:
+# Create Date: 2001/10/21 02:11PM
+# Purpose: Check whether java is the script we expect
+# Description:
+#	Under cygwin, we have to manipulate CLASS_PATH befor invoking the java
+#	executable. It is the job of /home/bin/java. And, this script test
+#	whether the path points to the java correctly
+#	To see the result, check whether $? is 0
+#
+#}}IS_NOTE
+#
+# Copyright (C) 2001 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+
+function show_help
+{
+	echo "Under Cygwin, java must be resolved to /home/bin/java"
+	echo "rather than $(which java)"
+	echo "Adjust \$PATH to let /home/bin preceding /WINNT/SYSTEM32"
+	echo
+	echo "If the environment is for Notebook, cp /home/bin/java to the local"
+	echo "drive, say, $(HOME)/bin. And, let $(HOME)/bin precedes"
+	echo "/home/bin to have the better performance."
+}
+
+if [ \( "$1" = "-h" \) -o \( "$1" = "--help" \) ] ; then
+	show_help
+fi
+
+if [ "$TERM" = "cygwin" ] ; then
+	if [ "$(type java)" != "java is /home/bin/java" ] ; then
+		#type is a shell builtin, so it performs better
+		#However, not all bash supports type (in this case empty is returned)
+		javapath=$(which java)
+		if [ "$javapath" != "/home/bin/java" ] ; then
+			if [ "$(grep 'TERM.*cygwin' $javapath)" = "" ] ; then
+				show_help
+				exit 2
+			fi
+		fi
+	fi
+fi

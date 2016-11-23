@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# Invoke e under Cygwin
+#
+
+#echo ue invokes e.exe after converting the path under Cygwin
+
+if [ $# = 0 ] ; then
+	#git --help
+	stree .
+# elif [ A$TERM = Acygwin ] ; then
+else
+	path=$1
+	if [ "$path" = "" ] ; then
+		path="."
+	fi
+	stree $path
+	#"C:/Program Files/TortoiseGit/bin/TortoiseGitProc.exe" /command:"$1" /path:"$path" &
+# else
+# 	echo Your shell is not Cygwin! However, we try to run e.exe anyway
+# 	git --help
+fi

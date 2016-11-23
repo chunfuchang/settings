@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<!DOCTYPE policy PUBLIC
+      "-//JBoss//DTD JBOSS Security Config 3.0//EN"
+      "http://www.jboss.org/j2ee/dtd/security_config.dtd" [
+<!ENTITY i3e-policy SYSTEM "../server/potix/conf/i3e-policy.xml">
+]>
+
+<!-- The XML based JAAS login configuration read by the
+org.jboss.security.auth.login.XMLLoginConfig mbean. Add
+an application-policy element for each security domain.
+
+The outline of the application-policy is:
+<application-policy name="security-domain-name">
+  <authentication>
+    <login-module code="login.module1.class.name" flag="control_flag">
+      <module-option name = "option1-name">option1-value</module-option>
+      <module-option name = "option2-name">option2-value</module-option>
+      ...
+    </login-module>
+
+    <login-module code="login.module2.class.name" flag="control_flag">
+      ...
+    </login-module>
+    ...
+  </authentication>
+</application-policy>
+
+$Revision: 1.8 $
+-->
+
+<policy>
+	&i3e-policy;
+
+    <!-- Security domain for JBossMQ
+    <application-policy name = "jbossmq">
+       <authentication>
+          <login-module code = "org.jboss.mq.sm.file.DynamicLoginModule"
+             flag = "required">
+             <module-option name = "unauthenticatedIdentity">guest</module-option>
+             <module-option name = "sm.objectname">jboss.mq:service=StateManager</module-option>
+          </login-module>
+       </authentication>
+    </application-policy>
+	-->
+
+    <!-- A template configuration for the jmx-console web application. This
+      defaults to the UsersRolesLoginModule the same as other and should be
+      changed to a stronger authentication mechanism as required.
+    <application-policy name = "jmx-console">
+       <authentication>
+          <login-module code="com.potix.id.impl.jboss.LoginModule"
+             flag = "required" />
+       </authentication>
+    </application-policy>
+    -->
+</policy>

@@ -1,0 +1,159 @@
+#!/bin/bash
+# java.upload
+#
+#{{IS_NOTE
+#	$Id: tomyeh Exp $
+#	Purpose:
+#		Upload Java libarary
+#	Description:
+#		
+#	History:
+#		Tue Apr 27 19:09:52     2004, Created by tomyeh@potix.com
+#}}IS_NOTE
+#
+#Copyright (C) 2004 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+
+setting=build.setting.local
+function helpit
+{
+	echo "java.upload - upload Java libraries and executable"
+	echo "Copyright (C) 2004 Potix Corporation. All Rights Reserved."
+	echo
+	echo "It uploads from the current directory to the share directory"
+	echo "Then, other users/projects could download them by java.download"
+	echo
+	echo "Usage:"
+	echo "  java.upload {local | remote}"
+	echo
+	echo "local"
+	echo "    Upload to the directory specfied by share.local in $setting"
+	echo "remote"
+	echo "    Upload to the directory specfied by share.remote in $setting"
+	exit 0
+}
+
+if [ "$1" = "--help" ] ; then
+	helpit
+fi
+
+if [ ! -f $setting ] ; then
+	echo "java.upload: $setting not found"
+	echo "Make sure you are running java.upload at the root of your checkout"
+	exit 1
+fi
+
+#prepare prjList
+if [ ! -f build.uploads ] ; then
+	echo build.uploads not found, so no files will be uploaded
+	exit 1
+fi
+prjList="$(cat build.uploads | tr '\n' ' ')"
+prjList=" $prjList "
+	#prefix and append with space
+exports=$(grep export= build.uploads)
+exports=${exports#export=}
+
+#prepare dstdir
+if [ "$1" == "local" ] ; then
+	dstdir=$(grep share.local $setting)
+	dstdir=${dstdir#share.local=}
+	if [ "$dstdir" = "" ] ; then
+		echo share.local must be specified in $setting
+		exit 1
+	fi
+elif [ "$1" == "remote" ] ; then
+	dstdir=$(grep share.remote $setting)
+	dstdir=${dstdir#share.remote=}
+	if [ "$dstdir" = "" ] ; then
+		echo share.remote must be specified in $setting
+		exit 1
+	fi
+elif [ "$1" == "" ] ; then
+	dstdir=$(grep share.remote $setting)
+	dstdir=${dstdir#share.remote=}
+	if [ ! -d "$dstdir" ] ; then
+		dstdir=$(grep share.local $setting)
+		dstdir=${dstdir#share.local=}
+		if [ "$dstdir" == "" ] ; then
+			echo Unable to identify the proper location
+			exit 1
+		fi
+	fi
+else
+	echo "java.upload: illegal argument"
+	echo "Try 'java.upload --help' for more information"
+	exit 1
+fi
+if [ ${dstdir#\~} != ${dstdir} ] ; then
+	dstdir=$HOME${dstdir#\~}
+fi
+echo Upload to $dstdir
+
+#Decide what dbgdir is (debug or release)
+dbgdir=$(grep D.ON $setting)
+dbgdir=${dbgdir#D.ON=}
+if [ "$dbgdir" == "true" ] ; then
+	dbgdir=debug
+elif [ "$dbgdir" == "false" ] ; then
+	dbgdir=release
+else
+	echo D.ON in $setting must be either true or false -- not $dbgdir
+	exit 1
+fi
+
+bindir=$dstdir/bin
+libdir=$dstdir/dist/lib/$dbgdir
+mkdir -p $bindir
+mkdir -p $libdir
+
+#Upload executable (only if CVS is found)
+echo Upload binary to $bindir
+if [ -d bin/CVS ] ; then
+	for f in bin/* ; do
+		fn=${f##*/}
+		if [ -f $f ] && [ "${prjList#* $fn }" != "$prjList" ] ; then
+			cp -f -p -u $f $bindir
+		elif [ "$fn" != "CVS" ] ; then
+			echo "  Ignore $f (not in build.uploads)"
+		fi
+	done
+fi
+
+echo Upload libraries to $libdir
+for f in dist/lib/* ; do
+	fn=${f##*/}
+	if [ -f $f ] && [ "${prjList#* $fn }" != "$prjList" ] ; then
+		if [ ! -d $f ] ; then
+			dstf=$libdir/$fn
+			if [ ! -f $dstf ] || [ $f -nt $dstf ] ; then
+				echo "  Copy $f to $libdir"
+				cp -f -p -u $f $libdir
+			fi
+		fi
+	elif [ "$fn" != "CVS" ] && [ ! -d $f ] ; then
+		echo "  Ignore $f (not in build.uploads)"
+	fi
+done
+
+if [ "$exports" != "" ] ; then
+	if [ "${exports#*,}" != "$exports" ] ; then
+		echo "Error: you cannot use multiple export targets in $exports"
+		exit 1
+	fi
+
+	expdir=$dstdir/dist/export/$exports
+	echo Upload export to $expdir
+	for f in dist/export/* ; do
+		if [ -d $f ] ; then
+			mkdir -p $expdir
+			cp -R -f -p -u dist/export/* $expdir
+			break
+		fi
+	done
+else
+	echo "  Ignore dist/export (export=dir not specified in build.uploads)"
+fi

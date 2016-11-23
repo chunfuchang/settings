@@ -1,0 +1,82 @@
+#!/bin/bash
+#
+#{{IS_NOTE
+#
+# Authors:	Henri Chen
+# Contributors:
+# Create Date:	2001/04/17 07:50PM
+# $Header: //time/potix/rd/cvs/java/bin/foreach,v 1.7 2003/03/07 04:16:33 henrichen Exp $
+# Purpose:	
+# Description:
+#
+#}}IS_NOTE
+#
+# Copyright (C) 2000 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+
+function helpit
+{
+	echo "foreach - for each input file do the operation"
+	echo "Copyright (C) 2001 Potix Corporation. All Rights Reserved."
+	echo
+	echo "Usage:"
+	echo "  foreach [-d output-dir] operation input-file-extension output-file-extension input-files..."
+	echo
+	echo "For each input file, the output file will be named by converting the file"
+	echo "extension as specified in the arguments. If no extension required, use '.'"
+	echo "You can use [], * or ? to specify the file extensions."
+	echo
+	echo "If output-dir is not specified, the current director is assumed."
+	exit 0
+}
+
+if [ A$1 = A--help ] ; then
+	helpit
+fi
+
+dstdir=$(pwd)
+
+while getopts "hd:" opt ; do
+	case $opt in
+	h ) helpit ;;
+	d ) dstdir=${OPTARG} ;;
+	\? )
+		echo "Try 'foreach --help' for more information"
+		exit 1
+	esac
+done
+shift $(($OPTIND - 1))
+dstdir=${dstdir%/}
+
+if [ $# -lt 4 ] ; then
+	echo "Error: not enough arguments"
+	echo "try 'foreach --help' for more information"
+	exit 1
+fi
+
+op=$1
+inext=$2
+outext=$3
+shift 3
+
+if [ $outext = '.' ] ; then
+	outext=
+fi
+
+for fn in $* ; do
+	if [ -f "$fn" ] ; then
+		tofile=${fn%$inext}$outext
+		tofile=$dstdir/${tofile##*/}
+		if [ "$fn" = "$tofile" ] ; then
+			echo "Ignore: input and output filenames are the same"
+		fi
+
+		if [ \( ! -f "$tofile" \) -o \( "$fn" -nt "$tofile" \)  ]; then
+			echo "$op $fn $tofile"
+			"$op" "$fn" "$tofile"
+		fi
+	fi
+done

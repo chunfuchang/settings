@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+#	cvsimport dir-name ...
+#		Import specified directories into cvs repository
+#		It is usually invoked by xc; i.e., you don't invoke it directly
+#
+# Tom M. Yeh, July, 2000
+#
+
+case $# in
+0)	echo 'Usage: cvsimport dir-name ...' 1>&2
+	echo "  Import specified directories into cvs repository" 1>&2
+	echo "  Unlike 'cvs import', you must execute it at the root" 1>&2
+	echo "  of your working directory" 1>&2
+	echo "  Example: cd ~/prj/jedi; cvsimport my_dir" 1>&2
+	exit 2;;
+esac
+
+for dir in $*
+do
+	echo Importing $dir...
+
+	#change dir
+	oldpath=$(pwd)
+	cd $dir
+	if [ "$?" != "0" ] ; then
+		echo Failed to change directory to $dir
+		exit 1
+	fi
+
+	#ensure not imported yet
+	if [ -f CVS/Root ] && [ -f CVS/Repository ] ; then
+		fn=$(head -1 CVS/Root)/$(head -1 CVS/Repository)
+		fn=${fn##*:}
+		if [ -d $fn ] ; then
+			echo $fn is already imported
+			exit 1
+		fi
+	fi
+
+	#import it
+	cvs import -m "create" $dir potix create
+	if [ "$?" != "0" ] ; then
+		echo Failed to import $dir
+		exit 1
+	fi
+
+	#remove local version and checkout
+	echo "Remove $oldpath/$dir and checkout newer version(y/n)?"
+	read bDel
+	if [ "$bDel" = "y" ] ; then
+		echo Remove and checkout $dir...
+		cd $oldpath
+		rm -rf $dir
+		cvs co $dir
+	else
+		echo $oldpath is not removed, you have to remove and checkout it by yourself
+	fi
+done

@@ -1,0 +1,73 @@
+#!/bin/bash
+# releasejavasrc
+#
+#{{IS_NOTE
+#	$Id: $
+#	Purpose:
+#		Release java source codes
+#	Description:
+#		
+#	History:
+#		Fri Feb 21 10:14:13     2003, Created by tomyeh@potix.com
+#}}IS_NOTE
+#
+#Copyright (C) 2002 Potix Corporation. All Rights Reserved.
+#
+#{{IS_RIGHT
+#}}IS_RIGHT
+#
+dstdir=/home/potix/rd/release
+if [ $# != 1 ] ; then
+	echo "Release Java source codes to $dstdir"
+	echo "Usage:"
+	echo "  releasejavasrc tag"
+	echo
+	echo "Example:"
+	echo "  releasejavasrc build-v2-beta3-20030401"
+	echo "Then, source codes are released to $dstdir/build-v2-beta3-20030401"
+	echo "  releasejavasrc build-2004.0.0-20040305"
+	echo "Then, source codes are released to $dstdir/build-2004.0.0-20040305"
+	exit 1
+fi
+
+target=$1
+if [ "${target/ /-}" != "${target}" ] ; then
+	echo "Don't specify whitespace in tag"
+	exit 1
+fi
+if [ ! -d $dstdir ] ; then
+	echo "$dstdir not a directory"
+	exit 1
+fi
+cd $dstdir
+mkdir $1
+if [ $? != 0 ] ; then
+	echo failed to create $dist/$1
+fi
+
+function releaseit() {
+	local prjnm=$1
+
+	mkdir -p $target/$prjnm
+	cd $target/$prjnm
+
+	echo "check out source to $(pwd)..."
+	xc co .
+
+	echo "Add the tag, $target, to cvs..."
+	tagnm=${target//./_}
+	tagnm=${tagnm//:/_}
+	tagnm=${tagnm//@/_}
+	xc rtag "$tagnm" *
+
+	echo "clean up..."
+	rm -rf CVSROOT certes tools epm *Test
+	find -name CVS | xargs rm -rf
+	echo "make files readonly..."
+	chmod a-w -R *
+
+	cd ../..
+}
+releaseit java
+cp ~/prj/java/dist/deploy/*.ear dist/deploy
+releaseit i3

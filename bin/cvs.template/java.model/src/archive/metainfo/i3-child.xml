@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- i3-child.xml
+	$Id: i3-child.xml,v 1.3 2005/03/15 03:30:27 tomyeh Exp $
+	Purpose:
+		
+	Description:
+		
+	History:
+		Fri Dec 24 12:13:33     2004, Created by tomyeh@potix.com
+
+Copyright (C) 2004 Potix Corporation. All Rights Reserved.
+-->
+
+<member>
+	<name>virtualRoot</name>
+	<comment><![CDATA[
+	[db] Whether this node is a virtual root.
+	If true, it is returned by ChildHome.findRoots() even if
+	it has a parent.
+	]]></comment>
+	<model-name>boolean</model-name>
+	<init>false</init><!-- It turns off when setParent is called -->
+</member>
+<member>
+	<name>leaf</name>
+	<comment><![CDATA[
+	[db, ro] Whether this object is a leaf of a tree, i.e.,
+	without any child.
+	<p>It is maintained automatically.
+	]]></comment>
+	<model-name>boolean</model-name>
+	<init>true</init><!-- It turns off when setParent is called -->
+	<accessible>read</accessible><!-- maintained internally -->
+</member>
+<member>
+	<name>level</name>
+	<comment><![CDATA[
+	[db, ro] Identifies which level this node is. If root, it must be 0.
+	<p>It is maintained automatically.
+	]]></comment>
+	<model-name>int</model-name>
+	<init>0</init>
+	<accessible>read</accessible><!-- maintained internally -->
+</member>
+<member>
+	<name>path</name>
+	<comment><![CDATA[
+	[db, ro] A catenation of ID from the root to this node.
+	<p>It is maintained automatically.
+	]]></comment>
+	<model-name>String</model-name>
+	<init>{code}</init><!-- it is done by TreeImpls.afterSetId -->
+	<accessible>read</accessible><!-- maintained internally -->
+</member>

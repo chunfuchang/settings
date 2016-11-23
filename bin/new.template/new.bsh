@@ -1,0 +1,17 @@
+/* {filename}
+
+	Purpose:
+		The script
+	Description:
+		
+	History:
+		{date}, Created by {user}
+
+Copyright (C) {year} Potix Corporation. All Rights Reserved.
+*/
+import java.util.*;
+
+import com.potix.lang.*;
+import com.potix.util.*;
+import com.potix.i3.pb.util.Pbs;
+

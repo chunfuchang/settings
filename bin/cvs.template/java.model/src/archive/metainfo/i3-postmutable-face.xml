@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- i3-postmutable-face.xml
+	$Id: i3-postmutable-face.xml,v 1.2 2004/12/07 13:51:02 tomyeh Exp $
+	Purpose:
+		The face methods that PostMutable must implement
+	Description:
+		
+	History:
+		Fri Sep 17 16:46:48     2004, Created by tomyeh@potix.com
+
+Copyright (C) 2004 Potix Corporation. All Rights Reserved.
+-->
+
+<face-method>
+	<method>void
+	setPostable(boolean postable, java.lang.Object relocateWith)
+	throws ModificationException;</method>
+	<comment><![CDATA[
+	Sets whether this object is postable.
+	]]></comment>
+</face-method>

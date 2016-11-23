@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# Invoke wse under Cygwin
+#
+
+#echo se, Shell Execute, invokes wse.exe after converting the path under Cygwin
+
+if [ $# = 0 ] ; then
+	wse
+elif [ A$TERM = Acygwin ] ; then
+#we got some problems when the arg with space, so we try "shift" and "while".
+#	for flnm in $@ ; do
+#		FP=$(cygpath -w "$flnm")
+#		echo wse "$FP"
+#	done	
+#
+	while [ "$1" != "" ] ; do
+  		FP=$(cygpath -w "$1")
+		wse "$FP"
+		shift 1
+	done
+else
+	echo Your shell is not Cygwin! However, we try to run wse anyway
+	wse $*
+fi

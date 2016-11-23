@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- i3-child-face.xml
+	$Id: i3-child-face.xml,v 1.1 2005/03/14 02:11:16 tomyeh Exp $
+	Purpose:
+		
+	Description:
+		
+	History:
+		Fri Mar 11 12:32:07     2005, Created by tomyeh@potix.com
+
+Copyright (C) 2005 Potix Corporation. All Rights Reserved.
+-->
+
+<face-method>
+	<method>com.potix.i3.util.tree.SParent getMyParent();</method>
+	<comment><![CDATA[
+	Returns the parent of this node.
+	]]></comment>
+</face-method>

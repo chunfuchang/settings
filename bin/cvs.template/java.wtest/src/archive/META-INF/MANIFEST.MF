@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Specification-Title: Test Codes for Potix Identity Service
+Specification-Version: 2.0
+Specification-Vendor: Potix Corporation
+Implementation-Title: com.potix.id
+Implementation-URL: http://www.potix.com/
+Implementation-Version: 2.0 (Build 1)
+Implementation-Vendor: Potix Corporation

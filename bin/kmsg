@@ -1,0 +1,11 @@
+# kmsg
+#	Display kernel messages
+
+if [ $HOME != /root ]
+then
+  echo You must change to a super user before executing kmsg
+  exit
+fi
+
+ps -ax | awk '/klogd$/ {print $1}' | xargs -r kill
+cat /proc/kmsg

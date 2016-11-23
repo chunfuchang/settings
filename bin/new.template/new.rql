@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE report>
+
+<!-- {filename}
+	Purpose:
+
+	Description:
+
+	History:
+		{date}, Created by {user}
+
+Copyright (C) {year} Potix Corporation. All Rights Reserved.
+-->
+
+<report>
+	<report-datasource>
+		<name>com.potix.sat.?DataSource</name>
+		<import path="metainfo/i3-model-sys.xml"/>
+		<import path="metainfo/i3sys-model.xml"/>
+		<import path="metainfo/biz-model.xml"/>
+		<param>
+			<name></name>
+			<model-name>String</model-name>
+		</param>
+		<ql><![CDATA[
+	SELECT OBJECT(t) FROM biz.party.Party AS t 
+	WHERE t.rule = ${=Rules.current}
+	AND ...
+	ORDER BY t.id
+		]]></ql>
+	</report-datasource>
+</report>
